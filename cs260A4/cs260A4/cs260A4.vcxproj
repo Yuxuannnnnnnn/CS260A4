@@ -139,13 +139,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="cs260A4.h" />
+    <ClInclude Include="core\Game.h" />
     <ClInclude Include="framework.h" />
+    <ClInclude Include="input\InputSystem.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="window\WindowSystem.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="cs260A4.cpp" />
+    <ClCompile Include="core\Game.cpp" />
+    <ClCompile Include="input\InputSystem.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="window\WindowSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="cs260A4.rc" />
