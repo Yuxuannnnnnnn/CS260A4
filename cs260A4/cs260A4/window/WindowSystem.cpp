@@ -51,18 +51,23 @@ ATOM WindowSystem::MyRegisterClass(HINSTANCE hInstance)
 BOOL WindowSystem::InitInstance(HINSTANCE, int)
 {
 
-	HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
+	HWND _hwnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
 		200, 100, _width, _height, nullptr, nullptr, _hInstance, nullptr);
 
-	if (!hWnd)
+	if (!_hwnd)
 	{
 		return FALSE;
 	}
 
-	ShowWindow(hWnd, _nCmdShow);
-	UpdateWindow(hWnd);
+	ShowWindow(_hwnd, _nCmdShow);
+	UpdateWindow(_hwnd);
 
 	return TRUE;
+}
+
+HWND WindowSystem::GetHandle() const
+{
+	return _hwnd;
 }
 
 

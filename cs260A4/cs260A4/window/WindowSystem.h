@@ -13,7 +13,9 @@ public:
 	void Update(bool& isRunning);
 	ATOM MyRegisterClass(HINSTANCE hInstance);
 	BOOL InitInstance(HINSTANCE, int);
+	HWND GetHandle() const;
 private:
+	HWND      _hwnd;
 	HINSTANCE _hInstance;
 	unsigned  _width;
 	unsigned  _height;
