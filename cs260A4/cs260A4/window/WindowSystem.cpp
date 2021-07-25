@@ -52,7 +52,7 @@ BOOL WindowSystem::InitInstance(HINSTANCE, int)
 {
 
 	HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
-		CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, _hInstance, nullptr);
+		200, 100, _width, _height, nullptr, nullptr, _hInstance, nullptr);
 
 	if (!hWnd)
 	{
