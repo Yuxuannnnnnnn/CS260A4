@@ -11,7 +11,7 @@ public:
 	bool GameIsRunning() const;
 
 	void Update();
-
+	
 
 private:
 	InputSystem _inputSystem;
