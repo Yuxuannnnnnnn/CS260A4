@@ -3,6 +3,7 @@
 #include <Windows.h>
 #include "../input/InputSystem.h"
 #include "../window/WindowSystem.h"
+#include "../physics/PhysicSystem.h"
 
 class Game
 {
@@ -16,7 +17,7 @@ public:
 private:
 	InputSystem _inputSystem;
 	WindowSystem _windowSystem;
-
+	PhysicSystem _physicSystem;
 	bool _isGameRunning;
 
 };

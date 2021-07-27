@@ -140,9 +140,15 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="core\Game.h" />
+    <ClInclude Include="core\GameObject.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="input\InputSystem.h" />
     <ClInclude Include="input\KeyEnum.h" />
+    <ClInclude Include="physics\AABBCollider.h" />
+    <ClInclude Include="physics\PhysicSystem.h" />
+    <ClInclude Include="physics\Rigidbody.h" />
+    <ClInclude Include="physics\Transform.h" />
+    <ClInclude Include="physics\Vector2.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="window\WindowSystem.h" />
@@ -151,6 +157,8 @@
     <ClCompile Include="core\Game.cpp" />
     <ClCompile Include="input\InputSystem.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="physics\PhysicSystem.cpp" />
+    <ClCompile Include="physics\Vector2.cpp" />
     <ClCompile Include="window\WindowSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
