@@ -4,12 +4,9 @@
 #include "../physics/Rigidbody.h"
 #include "../physics/AABBCollider.h"
 
-class GameObject
+struct GameObject
 {
-public:
-
-private:
-	Transform _transform;
-	Rigidbody _rigidbody;
-	AABBCollider _aabb;
+	Transform transform;
+	Rigidbody rigidbody;
+	AABBCollider aabb;
 };

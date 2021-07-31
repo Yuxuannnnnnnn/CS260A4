@@ -2,11 +2,8 @@
 
 #include "Vector2.h"
 
-class AABBCollider
+struct AABBCollider
 {
-public:
-
-private:
-	Vector2 _min;
-	Vector2 _max;
+	Vector2 min;
+	Vector2 max;
 };

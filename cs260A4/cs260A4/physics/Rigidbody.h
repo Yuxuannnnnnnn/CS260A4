@@ -2,11 +2,8 @@
 
 #include "Vector2.h"
 
-class Rigidbody
+struct Rigidbody
 {
-public:
-
-private:
 	Vector2 velocity;
 	Vector2 acceleration;
 };
