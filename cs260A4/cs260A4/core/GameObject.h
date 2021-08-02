@@ -6,7 +6,7 @@
 
 struct GameObject
 {
-	Transform transform;
+	Transform transform; //will use this for graphics
 	Rigidbody rigidbody;
-	AABBCollider aabb;
+	AABBCollider aabb;  //all asteroids will be the same size collider
 };
