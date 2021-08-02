@@ -1,0 +1,23 @@
+name: Send notifications to telegram
+on: [push]
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Send notifications
+      uses: yanzay/notify-telegram@v0.1.0
+      if: always()
+      with:
+        chat: ${{ secrets.CHAT }} # user id or channel name secret
+        token: ${{ secrets.TOKEN }} # token secret
+        status: ${{ job.status }} # do not modify this line
+        args: The ${{ github.event_name }} event triggered first step.
+    - uses: actions/checkout@master
+    - name: send custom message with args
+      uses: appleboy/telegram-action@master
+      with:
+        to: ${{ secrets.CHAT }} # user id or channel name secret
+        token: ${{ secrets.TOKEN }} # token secret
+        args: The ${{ github.event_name }} event triggered first step.
+
