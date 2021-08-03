@@ -6,11 +6,16 @@ Game::Game(HINSTANCE hinstance, int nCmdShow, unsigned width, unsigned height):
 {
 }
 
+
+
+//check boolean in main.cpp
 bool Game::GameIsRunning() const
 {
 	return _isGameRunning;
 }
 
+
+//update loop - per frame
 void Game::Update()
 {
 	_inputSystem.Update();
