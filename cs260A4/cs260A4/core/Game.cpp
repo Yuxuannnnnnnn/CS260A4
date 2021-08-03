@@ -14,6 +14,7 @@ bool Game::GameIsRunning() const
 void Game::Update()
 {
 	_inputSystem.Update();
+	_logicSystem.Update(_inputSystem, 0.016f);
 	_physicSystem.Update();
 
 	_windowSystem.Update(_isGameRunning);

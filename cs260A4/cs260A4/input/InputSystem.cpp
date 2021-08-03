@@ -9,7 +9,7 @@ void InputSystem::Update()
 	BOOL success = GetKeyboardState(_currKeyState);
 }
 
-bool InputSystem::KeyPressed(KEY key)
+bool InputSystem::KeyPressed(KEY key) const
 {
 
 	if ((_currKeyState[key] & 0xF0) && !(_prevKeyState[key] & 0xF0))
@@ -21,7 +21,7 @@ bool InputSystem::KeyPressed(KEY key)
 	return false;
 }
 
-bool InputSystem::KeyHold(KEY key)
+bool InputSystem::KeyHold(KEY key) const
 {
 	if (_currKeyState[key] & 0xF0)
 		return true;

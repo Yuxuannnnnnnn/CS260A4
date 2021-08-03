@@ -4,6 +4,7 @@
 #include "../input/InputSystem.h"
 #include "../window/WindowSystem.h"
 #include "../physics/PhysicSystem.h"
+#include "../logic/LogicSystem.h"
 
 class Game
 {
@@ -18,6 +19,7 @@ private:
 	InputSystem _inputSystem;
 	WindowSystem _windowSystem;
 	PhysicSystem _physicSystem;
+	LogicSystem  _logicSystem;
 	bool _isGameRunning;
 
 };

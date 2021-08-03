@@ -152,6 +152,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="core\Factory.h" />
+    <ClInclude Include="logic\LogicSystem.h" />
     <ClInclude Include="network\CRC_Checksum_Hash.h" />
     <ClInclude Include="Tools\Console.h" />
     <ClInclude Include="Tools\EngineSettings.h" />
@@ -172,6 +173,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="core\Factory.cpp" />
+    <ClCompile Include="logic\LogicSystem.cpp" />
     <ClCompile Include="network\CRC_Checksum_Hash.cpp" />
     <ClCompile Include="Tools\Console.cpp" />
     <ClCompile Include="Tools\CommandLine_Parser.cpp" />
