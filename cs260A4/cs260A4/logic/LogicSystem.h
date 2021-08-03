@@ -10,7 +10,6 @@ class LogicSystem
 public:
 	void Update(const InputSystem& inputsystem, float dt);
 
-	
 private:
 	float Wrap(float x, float x0, float x1);
 	float acceleration_speed = 40.0f;

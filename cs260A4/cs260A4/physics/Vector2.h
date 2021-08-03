@@ -14,7 +14,6 @@ struct Vector2
 	float GetMagnitude() const;
 	void Normalize();
 
-
 	float x;
 	float y;
 };

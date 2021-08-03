@@ -2,7 +2,6 @@
 #include "../framework.h"
 #include  <stdio.h>
 
-
 class Console
 {
 public:
@@ -29,11 +28,7 @@ public:
 	//init does nothing
 	Console()
 	{
-
 	}
 
 #endif
-
 };
-
-

@@ -1,4 +1,6 @@
 #include "WindowSystem.h"
+#include "../Resource.h"
+
 
 WindowSystem::WindowSystem(HINSTANCE hInstance, int nCmdShow, unsigned width, unsigned height) :
 	_hInstance{ hInstance },
@@ -10,6 +12,8 @@ WindowSystem::WindowSystem(HINSTANCE hInstance, int nCmdShow, unsigned width, un
 	LoadStringW(hInstance, IDC_CS260A4, szWindowClass, MAX_LOADSTRING);
 	MyRegisterClass(hInstance);
 	InitInstance(hInstance, nCmdShow);
+
+	HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_CS260A4));
 }
 
 void WindowSystem::Update(bool& isRunning)
@@ -50,8 +54,7 @@ ATOM WindowSystem::MyRegisterClass(HINSTANCE hInstance)
 
 BOOL WindowSystem::InitInstance(HINSTANCE, int)
 {
-
-	HWND _hwnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
+	 _hwnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
 		200, 100, _width, _height, nullptr, nullptr, _hInstance, nullptr);
 
 	if (!_hwnd)
@@ -69,7 +72,6 @@ HWND WindowSystem::GetHandle() const
 {
 	return _hwnd;
 }
-
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {

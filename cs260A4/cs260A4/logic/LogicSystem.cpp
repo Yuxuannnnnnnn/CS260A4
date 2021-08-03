@@ -3,9 +3,6 @@
 #include "../core/GameObject.h"
 #include "../physics/Vector2.h"
 
-
-
-
 void LogicSystem::Update(const InputSystem& inputsystem, float dt)
 {
 	// find Ship belong to this client
@@ -19,7 +16,6 @@ void LogicSystem::Update(const InputSystem& inputsystem, float dt)
 		ship->rigidbody.acceleration = accel;
 
 		// broadcast this acceleration to all other client
-
 
 		// end broadcast
 
@@ -38,7 +34,6 @@ void LogicSystem::Update(const InputSystem& inputsystem, float dt)
 
 		// broadcast this acceleration to all other client
 
-
 		// end broadcast
 
 		ship->rigidbody.velocity = ship->rigidbody.velocity + accel;
@@ -49,32 +44,22 @@ void LogicSystem::Update(const InputSystem& inputsystem, float dt)
 
 	if (inputsystem.KeyHold(VK_A))
 	{
-
-
 		ship->transform.rotation += rotation_speed * dt;
 		ship->transform.rotation = Wrap(ship->transform.rotation, -PI, PI);
 
 		// broadcast this acceleration to all other client
 
-
 		// end broadcast
-
-
 	}
 
 	if (inputsystem.KeyHold(VK_D))
 	{
-
-
 		ship->transform.rotation -= rotation_speed * dt;
 		ship->transform.rotation = Wrap(ship->transform.rotation, -PI, PI);
 
 		// broadcast this acceleration to all other client
 
-
 		// end broadcast
-
-
 	}
 }
 

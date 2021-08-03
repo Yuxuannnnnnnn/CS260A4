@@ -2,15 +2,15 @@
 
 #include <cmath>
 
-Vector2::Vector2():
-	x{0.0f},
-	y{0.0f}
+Vector2::Vector2() :
+	x{ 0.0f },
+	y{ 0.0f }
 {
 }
 
-Vector2::Vector2(float x_, float y_):
-	x{x_},
-	y{y_}
+Vector2::Vector2(float x_, float y_) :
+	x{ x_ },
+	y{ y_ }
 {
 }
 

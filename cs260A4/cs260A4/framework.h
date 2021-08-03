@@ -14,6 +14,5 @@
 #include <memory.h>
 #include <tchar.h>
 
-
 //define debug mode & Assert function for logging errors
 #include "Tools/EngineSettings.h"

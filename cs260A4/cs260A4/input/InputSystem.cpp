@@ -11,7 +11,6 @@ void InputSystem::Update()
 
 bool InputSystem::KeyPressed(KEY key) const
 {
-
 	if ((_currKeyState[key] & 0xF0) && !(_prevKeyState[key] & 0xF0))
 		return true;
 	return false;

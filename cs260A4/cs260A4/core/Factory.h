@@ -3,7 +3,6 @@
 #include <vector>
 #include <unordered_map>
 
-
 class Factory
 {
 public:
@@ -17,17 +16,14 @@ public:
 	//no need to be thread safe
 	//gameObjects container not related to communication with the other packets
 	std::vector<gameObjectID> DeletionList;
-	
 
-//-------------helper functions for GameObjects------------------------
+	//-------------helper functions for GameObjects------------------------
 
-
-	//When host client Spawns the gameObjects
-	//host client will send to all other clients the list of gameObjects spawned
-	//All other clients will insert the list of gameObjects
+		//When host client Spawns the gameObjects
+		//host client will send to all other clients the list of gameObjects spawned
+		//All other clients will insert the list of gameObjects
 	void insert_GameObjects_DataInitialisation()
 	{
-
 	}
 
 	//SYSTEMS to call this when they want to delete a gameObject
@@ -35,7 +31,6 @@ public:
 	{
 		DeletionList.push_back(id);
 	}
-
 
 	//Update factory at the end of loop
 	void update()
@@ -50,7 +45,4 @@ public:
 		//clear the deletion list
 		DeletionList.clear();
 	}
-
-
 };
-

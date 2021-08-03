@@ -14,7 +14,7 @@ enum TYPE
 
 struct GameObject
 {
-	Transform transform; //will use this for graphics
+	Transforms transform; //will use this for graphics
 	Rigidbody rigidbody;
 	AABBCollider aabb;  //all asteroids will be the same size collider
 	TYPE obj_type;

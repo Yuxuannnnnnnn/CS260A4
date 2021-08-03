@@ -2,7 +2,7 @@
 
 #include "Vector2.h"
 
-struct Transform
+struct Transforms
 {
 	Vector2 position;
 	float rotation;

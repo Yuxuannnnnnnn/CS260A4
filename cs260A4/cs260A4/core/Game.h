@@ -5,6 +5,8 @@
 #include "../window/WindowSystem.h"
 #include "../physics/PhysicSystem.h"
 #include "../logic/LogicSystem.h"
+#include "../logic/LogicSystem.h"
+#include "../graphics/GraphicsSystem.h"
 
 class Game
 {
@@ -13,13 +15,13 @@ public:
 	bool GameIsRunning() const;
 
 	void Update();
-	
 
 private:
 	InputSystem _inputSystem;
 	WindowSystem _windowSystem;
 	PhysicSystem _physicSystem;
 	LogicSystem  _logicSystem;
-	bool _isGameRunning;
+	GraphicsSystem _graphicsSystem;
 
+	bool _isGameRunning;
 };

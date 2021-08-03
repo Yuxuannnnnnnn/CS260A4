@@ -2,4 +2,3 @@
 class CRC_Checksum_Hash
 {
 };
-
