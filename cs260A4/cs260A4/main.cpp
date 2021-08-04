@@ -27,6 +27,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	// TODO: Init Network System, wrapp outside the game or inside?
 
+
 	std::unique_ptr<Game> game = std::make_unique<Game>(hInstance, nCmdShow, WINDOW_WIDTH, WINDOW_HEIGHT);
 
 	while (game->GameIsRunning())
