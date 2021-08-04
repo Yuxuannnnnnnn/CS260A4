@@ -7,6 +7,7 @@
 #include "../logic/LogicSystem.h"
 #include "../logic/LogicSystem.h"
 #include "../graphics/GraphicsSystem.h"
+#include "../Tools/Timer.h"
 
 class Game
 {
@@ -22,6 +23,8 @@ private:
 	PhysicSystem _physicSystem;
 	LogicSystem  _logicSystem;
 	GraphicsSystem _graphicsSystem;
-
+	Timer _gametime;
+	Timer _dt;
+	static constexpr float dt = 1.0f / 60.0f;
 	bool _isGameRunning;
 };
