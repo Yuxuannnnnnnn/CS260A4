@@ -17,7 +17,12 @@ class LogicSystem
 {
 	typedef std::vector<Message> message;
 	typedef std::pair<GameCommands, message> Event;
-	std::vector<Event> EventsList;
+
+	typedef int playerIndex;
+	typedef std::pair<playerIndex, Event> playerIndex_Event_Pair ;
+	//list of playerIndex & Event Pair
+	//the logic system has to clear this eventsList every loop
+	std::vector<playerIndex_Event_Pair> EventsList;
 	std::mutex EventsList_Mutex;
 
 
@@ -25,11 +30,34 @@ class LogicSystem
 		const std::vector<Message> messageList)>
 		InsertNotificationFunction;
 
+	//for logic update to use 
 	//callback function to insert a notification to the 
 	//notification list in the networking system
 	InsertNotificationFunction _InsertNotification;
 
+
+
+	//boolean for whether this player is a host
+	bool _isHost{ false };
+	//list of playerindex		
+	std::vector<int> _playerIndexList;
+	//Own player ID
+	int _playerID;
+
+
 public:
+
+	//callback function for network system use 
+	//to configure if this client is a HostPlayer
+	void HostPlayer(bool isHost, 
+		std::vector<int>& playerIndexList, 
+		int playerID)
+	{
+		_isHost = isHost;
+		_playerIndexList = playerIndexList;
+		_playerID = playerID;
+	}
+
 
 	void Init(const InsertNotificationFunction& InsertNotification)
 	{
@@ -52,7 +80,7 @@ public:
 	{
 		std::lock_guard<std::mutex> EventsListLock{ EventsList_Mutex };
 		//stores the event in the EventsList
-		EventsList.push_back(_event);
+		EventsList.push_back({ clientAddressIndex,_event });
 	}
 
 private:

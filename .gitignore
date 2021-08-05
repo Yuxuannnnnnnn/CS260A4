@@ -57,3 +57,12 @@ cs260A4/cs260A4/x64/Debug/cs260A4.vcxproj.FileListAbsolute.txt
 cs260A4/cs260A4/x64/Debug/GameCommands.obj
 cs260A4/cs260A4/x64/Debug/MessageFormat.obj
 cs260A4/cs260A4/x64/Debug/NetworkSystem.obj
+cs260A4/.vs/cs260A4/v16/ipch/AutoPCH/21cc3d9939e07ed9/CRC_CHECKSUM_HASH.ipch
+cs260A4/.vs/cs260A4/v16/ipch/AutoPCH/22f9f44a8fa34c43/NETWORKSYSTEM.ipch
+cs260A4/.vs/cs260A4/v16/ipch/AutoPCH/3f8610c593e923d9/FACTORY.ipch
+cs260A4/.vs/cs260A4/v16/ipch/AutoPCH/66f0444e88f9dc31/MAIN.ipch
+cs260A4/.vs/cs260A4/v16/ipch/AutoPCH/7c5e98f4286b161b/LOGICSYSTEM.ipch
+cs260A4/.vs/cs260A4/v16/ipch/AutoPCH/7d252f2babebb403/CLIENTUDPSOCKET.ipch
+cs260A4/.vs/cs260A4/v16/ipch/AutoPCH/9e5e6769be6fb0f8/TIMER.ipch
+cs260A4/.vs/cs260A4/v16/ipch/AutoPCH/a9d60100fddc232a/GAMECOMMANDS.ipch
+cs260A4/cs260A4/x64/Debug/cs260A4.tlog/CL.10196.write.1.tlog

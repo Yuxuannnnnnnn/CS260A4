@@ -17,7 +17,13 @@ Game::Game(HINSTANCE hinstance, int nCmdShow, unsigned width, unsigned height) :
 		std::bind(&LogicSystem::InsertEvent, 
 		&_logicSystem, 
 		std::placeholders::_1, 
-		std::placeholders::_2));
+		std::placeholders::_2), 
+		std::bind(&LogicSystem::HostPlayer,
+			&_logicSystem,
+			std::placeholders::_1, 
+			std::placeholders::_2,
+			std::placeholders::_3));
+
 
 	_logicSystem.Init(
 		std::bind(&NetworkSystem::InsertNotification,
@@ -41,9 +47,12 @@ void Game::Run(Hostname_Port_List& list)
 	//wait for all clients to be online first
 	//before starting game
 
-
 #ifdef Test
+
+	typedef std::vector<int> clientIndicesList;
+	clientIndicesList indicesList;
 	_networkSystem.Wait_ToConnectAllClients(list);
+
 
 	//the network system runs multiple threads
 	//to receive packets from socket 
@@ -51,6 +60,7 @@ void Game::Run(Hostname_Port_List& list)
 	std::thread NetworkSystem_Thread{
 			&NetworkSystem::ReceiveEvents,
 			std::ref(_networkSystem) };
+
 #endif
 
 
@@ -66,12 +76,16 @@ void Game::Run(Hostname_Port_List& list)
 		
 
 		//send notifications to all other clients
-		_networkSystem.Update();
+		_networkSystem.BroadcastEventsToClients();
 		
 		_physicSystem.Update();						//update physics
 
 		_graphicsSystem.Update();					//update graphics
 		_graphicsSystem.LateUpdate();				//update graphics - swap buffer
+
+		//Update factory at the end of loop
+		//delete all the object in the deletionlist
+		_factory.update();
 
 		//waste time to make it 60 frames per second
 		while (_dt.GetDuration() < dt)

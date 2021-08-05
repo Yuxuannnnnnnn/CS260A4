@@ -114,16 +114,22 @@ public:
         const std::string& clientPortString, 
         const std::string& clientHostNameString);
 
-    int getClientIndex(sockaddr addr)
+
+    std::unordered_map<Index, sockaddr>& GetIndexAddrList()
     {
-        for (auto& IndexAddr: Index_Addresses)
-        {
-            //if the blocks of memory are the same
-            //then return the index
-            if (!memcmp(&IndexAddr.second, &addr, sizeof(addr)))
-                return IndexAddr.first;
-        }
+        return Index_Addresses;
     }
+
+    //int getClientIndex(sockaddr addr)
+    //{
+    //    for (auto& IndexAddr: Index_Addresses)
+    //    {
+    //        //if the blocks of memory are the same
+    //        //then return the index
+    //        if (!memcmp(&IndexAddr.second, &addr, sizeof(addr)))
+    //            return IndexAddr.first;
+    //    }
+    //}
 
 //-------------------------------------------------------------------------
 

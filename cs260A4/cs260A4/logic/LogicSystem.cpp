@@ -2,11 +2,13 @@
 #include <cmath>
 #include "../core/GameObject.h"
 #include "../physics/Vector2.h"
+#include "../network/GameCommands.h"
 
 void LogicSystem::Update(const InputSystem& inputsystem, float dt, float gametime)
 {
 	// find Ship belong to this client
 	GameObject* ship = nullptr;
+
 
 	if (inputsystem.KeyHold(VK_W))
 	{
@@ -25,6 +27,7 @@ void LogicSystem::Update(const InputSystem& inputsystem, float dt, float gametim
 		_InsertNotification(GameCommands::MoveForward, { {(char*)&drdata, sizeof(DRData)} });
 
 		// end broadcast
+
 
 		ship->rigidbody.velocity = ship->rigidbody.velocity + accel;
 
