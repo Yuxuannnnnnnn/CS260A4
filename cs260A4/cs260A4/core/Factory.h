@@ -1,6 +1,8 @@
 #pragma once
 #include "GameObject.h"
+#include "../Math/Vector.h"
 #include <vector>
+#include <array>
 #include <unordered_map>
 
 class Factory
@@ -20,29 +22,68 @@ public:
 	std::vector<gameObjectID> DeletionList;
 
 	//store this player gameObjectID
-	gameObjectID playerID;
+	gameObjectID _playerObjectID;
 
-	//list of players gameObjectID
-	std::vector<gameObjectID> playerObjectsList;
+
+	//list of playersID and gameObjectID
+	typedef int playerID;
+	std::unordered_map<playerID, gameObjectID> playerObjectsList;
 
 	//-------------helper functions for GameObjects------------------------
 
 	//for logicSystem to get the player GameObject
-	GameObject getOwnPlayer()
+	GameObject& getOwnPlayer()
 	{
-		return gameObjects[playerID];
+		return gameObjects[_playerObjectID];
+	}
+
+	//for logicSystem to get any opponent player GameObject
+	GameObject& getPlayer(playerID ID)
+	{
+		return gameObjects[playerObjectsList[ID]];
 	}
 
 
 	//creation of playerShips at the start of the game 
-	//at a position
-	void Create_playerShips_DataInitialisation(std::vector<int> indicesList)
+	//different ships have different colors
+	const std::unordered_map<int, gameObjectID>&  Create_playerShips_DataInitialisation(
+		std::vector<int> indicesList, 
+		int playerID)
 	{
-		//create own ship
-		
-		//create all other clients ship & assign the indices to them
+		//create own ship - blue color
+		playerObjectsList.insert({ playerID, _playerObjectID = CreateShip(playerID, { 0.f, 0.f, 1.f }) });
+
+		std::array<Vector3, 3> colorList;
+		colorList[0] = { 1.0f, 0.f, 0.f };
+		colorList[1] = {0.f, 1.0f, 0.f};
+		colorList[2] = {1.0f, 1.0f, 0.f};
+
+		for (size_t i = 0; i < indicesList.size(); i++)
+		{
+			//create all other clients ship & assign the indices to them
+			playerObjectsList.insert({ indicesList[i], CreateShip(indicesList[i], colorList[i]) });
+		}
+
+		return playerObjectsList;
 
 	}
+
+	//returns gameObject ID
+	gameObjectID CreateShip(int playerID, Vector3 color)
+	{
+		gameObjects[counterID] = GameObject{};
+		gameObjects[counterID].transform.position = { 0.f, 0.f };
+		gameObjects[counterID].transform.scale = { 20.f, 20.f };
+		gameObjects[counterID].transform.rotation = 0.f;
+		gameObjects[counterID].mesh = MeshType::triangle;
+		gameObjects[counterID].color = color;
+		gameObjects[counterID].playerIndex = playerID;
+
+		counterID++;
+
+		return counterID - 1;
+	}
+
 
 	//Every client will spawn asteroid
 	// They will broadcast to everyone the asteroid positions & velocity
@@ -50,23 +91,11 @@ public:
 	//All other clients will insert the list of gameObjects
 	void Asteroids_DataInitialisation( )
 	{
+
 	}
 
 
-	//returns gameObject ID
-	int CreateShip()
-	{
-		gameObjects[counterID] = GameObject{};
-		gameObjects[counterID].transform.position = { 0.f, 0.f };
-		gameObjects[counterID].transform.scale = {20.f, 20.f};
-		gameObjects[counterID].transform.rotation = 0.f;
-		gameObjects[counterID].mesh = MeshType::triangle;
-		gameObjects[counterID].color;
 
-		counterID++;
-
-		return counterID -1;
-	}
 
 	//SYSTEMS to call this when they want to delete a gameObject
 	void DeleteGameObjectID(gameObjectID id)

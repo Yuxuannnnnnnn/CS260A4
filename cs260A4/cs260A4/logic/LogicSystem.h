@@ -41,7 +41,7 @@ class LogicSystem
 	//boolean for whether this player is a host
 	bool _isHost{ false };
 	//list of playerindex		
-	std::vector<int> _playerIndexList;
+	std::vector<playerIndex> _playerIndexList;
 	//Own player ID
 	int _playerID;
 
@@ -55,7 +55,9 @@ public:
 		int playerID)
 	{
 		_isHost = isHost;
+		//used for creation of ship
 		_playerIndexList = playerIndexList;
+
 		_playerID = playerID;
 	}
 
