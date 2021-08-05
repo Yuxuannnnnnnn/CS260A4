@@ -365,6 +365,12 @@ public:
 	
 	void ReceiveEventFromClient(int clientAddressIndex)
 	{
+		int playerIndex = -1;
+
+		for (auto& pair : PlayerIndex_ClientSockIndex)
+			if (pair.second == clientAddressIndex)
+				playerIndex = pair.first;
+
 		//continuously receiveMessage from this client
 		while (true)
 		{
@@ -385,7 +391,7 @@ public:
 			}
 
 			//insert the message to the logicSystem eventlist
-			_InsertEvent(clientAddressIndex, //indicates player ID
+			_InsertEvent(playerIndex, //indicates player ID
 				{ Command, message });
 		}
 	}
