@@ -1,11 +1,25 @@
 #pragma once
+
+
+#ifndef COMMANDLINE_PARSER
+#define COMMANDLINE_PARSER
+
 #include <Windows.h> //for windows functions, get cmd line
 #include <memory> //for printf
 
 #include <string>
 #include <vector>
 
+#include <shellapi.h>
+
+
 #include "EngineSettings.h" //for ASSERT function
+
+
+typedef std::string HostnameString;
+typedef std::string PortString;
+typedef  std::vector<std::pair<HostnameString, PortString>> Hostname_Port_List;
+
 
 class CommandLine_Parser
 {
@@ -16,9 +30,7 @@ class CommandLine_Parser
 	//number of arguments
 	int nArgs = 0;
 
-	typedef std::string HostnameString;
-	typedef std::string PortString;
-	typedef  std::vector<std::pair<HostnameString, PortString>> Hostname_Port_List;
+
 	//list of Pairs of HostName& Port strings
 	Hostname_Port_List hostname_Port_List;
 
@@ -101,7 +113,7 @@ public:
 
 	//getter function
 	//returns a list of Pairs of HostName & Port strings
-	const Hostname_Port_List& Get_HostName_Port_List()
+	Hostname_Port_List& Get_HostName_Port_List()
 	{
 		return hostname_Port_List;
 	}
@@ -113,3 +125,6 @@ public:
 		LocalFree(szArglist);
 	}
 };
+
+
+#endif

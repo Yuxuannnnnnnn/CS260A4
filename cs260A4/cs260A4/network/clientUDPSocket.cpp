@@ -1,7 +1,6 @@
 #include "ClientUDPSocket.h"
 
 
-
 /*******************************************************************************
  * A simple UDP/IP client application
  ******************************************************************************/
@@ -211,9 +210,11 @@ int clientUDPSocket::udt_receive(
     //Initialize random number generator
     //The pseudo - random number generator is
         //initialized using the argument passed as seed.
-    srand((size_t)time(NULL));
+    srand((unsigned)time(NULL));
     //convert rate [0, 1] to [0, 100]
-    int rate = (int)(RateOfPacketLoss_ * 100.0f);
+
+    //100% chance - no packets is dropped
+    int rate = 100;//(int)(RateOfPacketLoss_ * 100.0f);
 
 
     //blocking call that receives bytes from the clientSocket
@@ -231,7 +232,7 @@ int clientUDPSocket::udt_receive(
     {
         //blocking call that receives bytes from the clientSocket
         bytesReceived = recvfrom(clientUDPSock_,
-            buffer, BUFFER_SIZE - 1, 
+            buffer, (int)BUFFER_SIZE - 1, 
             0,
             &addr,
             &AddressSize);

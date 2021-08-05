@@ -12,11 +12,27 @@
 This file contains the wrapper for Winsock Application and
 the Client Socket.
 *******************************************************************************/
+
+#ifndef CLIENT_UDP_SOCKET
+#define CLIENT_UDP_SOCKET
+
+
+//Tell the Visual Studio linker to include the following library in linking.
+ //Alternatively, we could add this file to the linker command-line parameters, 
+ // but including it in the source code simplifies the configuration.
+#pragma comment (lib, "ws2_32.lib")
+
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+
 #ifndef WINDOWS
 #define WINDOWS
 #include "ws2tcpip.h"		// getaddrinfo()
 #include "Windows.h"		// Entire Win32 API...
 #endif
+
+
 
 #include <iostream>			// cout, cerr
 #include <string>			// string
@@ -24,7 +40,7 @@ the Client Socket.
 #include <array>
 
 #include "MessageFormat.h"
-#include "ApplicationCommands.h"
+#include "GameCommands.h"
 
 
 /*******************************************************************************
@@ -98,6 +114,17 @@ public:
         const std::string& clientPortString, 
         const std::string& clientHostNameString);
 
+    int getClientIndex(sockaddr addr)
+    {
+        for (auto& IndexAddr: Index_Addresses)
+        {
+            //if the blocks of memory are the same
+            //then return the index
+            if (!memcmp(&IndexAddr.second, &addr, sizeof(addr)))
+                return IndexAddr.first;
+        }
+    }
+
 //-------------------------------------------------------------------------
 
 
@@ -119,7 +146,7 @@ public:
     //returns false if client has disconnected
     int ReceiveMessage(
         int AddrIndex, 
-        ApplicationCommands& Command,
+        GameCommands& Command,
         std::vector<Message>& message)
 
     {
@@ -230,7 +257,7 @@ public:
 
         messageFromClient[LengthOfPayload] = '\0';
 
-        Command = (ApplicationCommands)command;
+        Command = (GameCommands)command;
 
         size_t offset_size = 0;
         LengthOfPayload -= 1; //for nullchar
@@ -313,9 +340,16 @@ public:
     }
 
 
-    bool BroadcastMessage()
+    //send the message to all clients
+    void BroadcastMessage(const Message& message)
     {
-
+        //send the message to all clients
+        for (auto& address: Index_Addresses)
+        {
+            SendClientMessage(
+                address.first,
+                message);
+        }
     }
 
  //-------------------------------------------------------------------------
@@ -328,3 +362,4 @@ public:
     void Cleanup();
 };
 
+#endif

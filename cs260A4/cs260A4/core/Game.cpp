@@ -1,5 +1,9 @@
 #include "Game.h"
 #include <iostream>
+#include <thread>
+#include <functional>
+#include <iostream>
+
 
 
 Game::Game(HINSTANCE hinstance, int nCmdShow, unsigned width, unsigned height) :
@@ -8,6 +12,19 @@ Game::Game(HINSTANCE hinstance, int nCmdShow, unsigned width, unsigned height) :
 {
 	//graphics initialisation
 	_graphicsSystem.Init(_windowSystem.GetHandle());
+
+	_networkSystem.Init(
+		std::bind(&LogicSystem::InsertEvent, 
+		&_logicSystem, 
+		std::placeholders::_1, 
+		std::placeholders::_2));
+
+	_logicSystem.Init(
+		std::bind(&NetworkSystem::InsertNotification,
+			&_networkSystem,
+			std::placeholders::_1,
+			std::placeholders::_2));
+
 	_gametime.Start();
 }
 
@@ -18,21 +35,51 @@ bool Game::GameIsRunning() const
 }
 
 //update loop - per frame
-void Game::Update()
+void Game::Run(Hostname_Port_List& list)
 {
-	_dt.Reset();
-	_windowSystem.Update(_isGameRunning);		//Go through all Windows Messages
 
-	_inputSystem.Update();						//get inputs
-	_logicSystem.Update(_inputSystem, 0.016f);  //check player logic in input
-	_physicSystem.Update();						//update physics
+	//wait for all clients to be online first
+	//before starting game
 
-	_graphicsSystem.Update();					//update graphics
-	_graphicsSystem.LateUpdate();					//update graphics
 
-	while (_dt.GetDuration() < dt)
+#ifdef Test
+	_networkSystem.Wait_ToConnectAllClients(list);
+
+	//the network system runs multiple threads
+	//to receive packets from socket 
+	//from each address
+	std::thread NetworkSystem_Thread{
+			&NetworkSystem::ReceiveEvents,
+			std::ref(_networkSystem) };
+#endif
+
+
+	while (GameIsRunning())
 	{
+		//reset the timer
+		_dt.Reset();
+
+		_windowSystem.Update(_isGameRunning);		//Go through all Windows Messages
+
+		_inputSystem.Update();						//get inputs
+		_logicSystem.Update(_inputSystem, 0.016f);  //check player logic in input
+		
+
+		//send notifications to all other clients
+		_networkSystem.Update();
+		
+		_physicSystem.Update();						//update physics
+
+		_graphicsSystem.Update();					//update graphics
+		_graphicsSystem.LateUpdate();				//update graphics - swap buffer
+
+		//waste time to make it 60 frames per second
+		while (_dt.GetDuration() < dt)
+		{
+		}
+
 	}
 
 	//std::cout << "delta time is " << _dt.GetDuration() << std::endl;
 }
+
