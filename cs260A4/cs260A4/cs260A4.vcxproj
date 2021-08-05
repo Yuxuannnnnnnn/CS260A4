@@ -168,6 +168,7 @@
     <ClInclude Include="graphics\Mesh.h" />
     <ClInclude Include="graphics\OpenGLErrorCheck.h" />
     <ClInclude Include="graphics\Shader.h" />
+    <ClInclude Include="logic\DRData.h" />
     <ClInclude Include="logic\LogicSystem.h" />
     <ClInclude Include="Math\Color.h" />
     <ClInclude Include="Math\Math.h" />

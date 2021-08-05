@@ -3,7 +3,7 @@
 #include "../core/GameObject.h"
 #include "../physics/Vector2.h"
 
-void LogicSystem::Update(const InputSystem& inputsystem, float dt)
+void LogicSystem::Update(const InputSystem& inputsystem, float dt, float gametime)
 {
 	// find Ship belong to this client
 	GameObject* ship = nullptr;
@@ -17,10 +17,12 @@ void LogicSystem::Update(const InputSystem& inputsystem, float dt)
 
 		// broadcast this acceleration to all other client
 
-		// send move command with accel
-		// so that other client perform DR
 
 
+		// DOTO:: get the player index
+		int playerindex = 0;
+		DRData drdata{ accel.x, accel.y, gametime, playerindex};
+		_InsertNotification(GameCommands::MoveForward, { {(char*)&drdata, sizeof(DRData)} });
 
 		// end broadcast
 
@@ -37,6 +39,11 @@ void LogicSystem::Update(const InputSystem& inputsystem, float dt)
 
 		ship->rigidbody.acceleration = accel;
 
+		// DOTO:: get the player index
+
+		int playerindex = 0;
+		DRData drdata{ accel.x, accel.y, gametime, playerindex };
+		_InsertNotification(GameCommands::MoveForward, { {(char*)&drdata, sizeof(DRData)} });
 		// broadcast this acceleration to all other client
 
 		// end broadcast
@@ -53,7 +60,7 @@ void LogicSystem::Update(const InputSystem& inputsystem, float dt)
 		ship->transform.rotation = Wrap(ship->transform.rotation, -PI, PI);
 
 		// broadcast this acceleration to all other client
-
+		_InsertNotification(GameCommands::RotateLeft, { {(char*)&ship->transform.rotation, sizeof(ship->transform.rotation)} });
 		// end broadcast
 	}
 
@@ -63,7 +70,7 @@ void LogicSystem::Update(const InputSystem& inputsystem, float dt)
 		ship->transform.rotation = Wrap(ship->transform.rotation, -PI, PI);
 
 		// broadcast this acceleration to all other client
-
+		_InsertNotification(GameCommands::RotateRight, { {(char*)&ship->transform.rotation, sizeof(ship->transform.rotation)} });
 		// end broadcast
 	}
 
@@ -75,24 +82,63 @@ void LogicSystem::Update(const InputSystem& inputsystem, float dt)
 	}
 }
 
-void LogicSystem::PullEvent()
+void LogicSystem::PullEvent(float currgametime)
 {
 	// while event list not empty, pull events
-	while (!EventsList.empty())
+	for(auto& eventpair : EventsList)
 	{
-		// if theres a move command, perform DR
+		auto command = eventpair.first;
+		switch (command)
+		{
+		case GameCommands::MoveForward:
+			DRData drdata;
+			memcpy(&drdata, &(eventpair.second[0]), sizeof(DRData));
+			
+			// find the correct player index from Gameobj container from factory
+
+			GameObject* player = nullptr;
+
+
+
+			break;
+		case GameCommands::MoveBackward:
+			DRData drdata;
+			memcpy(&drdata, &(eventpair.second[0]), sizeof(DRData));
+
+			// find the correct player index from Gameobj container from factory
+
+			GameObject* player = nullptr;
+			PerformDR(player, currgametime, drdata.gametime, Vector2{ drdata.accelx, drdata.accely });
+
+
+			break;
+		case GameCommands::RotateLeft:
+
+
+
+		}
+
 	}
+
+	EventsList.clear();
 }
 
 void LogicSystem::SynchronisePosition()
 {
+
 	// send a syn command, of player position, rotation, velocity
 }
 
-void LogicSystem::PerformDR()
+void LogicSystem::PerformDR(GameObject* ship, float currgametime, float drtime, Vector2 accleration)
 {
-	// extrapolate the position base on time difference
+	
+	float timediff = currgametime - drtime;
+	
+	// acceleration already multipled by deltatime before passed in
+	ship->rigidbody.velocity = ship->rigidbody.velocity + accleration;
 
+	// extrapolate the position base on time difference
+	ship->transform.position = ship->transform.position + ship->rigidbody.velocity * timediff;
 	// receive a ship player to perform DR
 	// receive the game time of the sender
 	// find the time difference, game time on this client - game time of sender

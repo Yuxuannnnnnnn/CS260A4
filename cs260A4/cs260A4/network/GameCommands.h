@@ -6,6 +6,11 @@ enum class GameCommands
 //-------------------------------------------------from client to client---------------------------------------------------
 	JoinGame,				//Just Joined the Game					Payload: no payload
 	InGame,					//Already in the Game					Payload: no payload
+	MoveForward,
+	MoveBackward,
+	RotateLeft,
+	RotateRight,
+	Shoot,
 
 
 

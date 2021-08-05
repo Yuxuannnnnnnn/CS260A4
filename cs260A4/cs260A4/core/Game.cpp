@@ -62,7 +62,7 @@ void Game::Run(Hostname_Port_List& list)
 		_windowSystem.Update(_isGameRunning);		//Go through all Windows Messages
 
 		_inputSystem.Update();						//get inputs
-		_logicSystem.Update(_inputSystem, 0.016f);  //check player logic in input
+		_logicSystem.Update(_inputSystem, dt, _gametime.GetDuration());  //check player logic in input
 		
 
 		//send notifications to all other clients

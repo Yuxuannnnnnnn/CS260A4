@@ -5,6 +5,7 @@
 #include <vector>
 #include <mutex>
 #include <functional>
+#include "DRData.h"
 
 //for event
 #include "../network/MessageFormat.h"
@@ -38,7 +39,7 @@ public:
 
 	//when looping through the eventslist in the update
 	//should lock the mutex before entering the loop
-	void Update(const InputSystem& inputsystem, float dt);
+	void Update(const InputSystem& inputsystem, float dt, float gametime);
 
 
 	//a function for the NetworkSystem to use
@@ -59,9 +60,9 @@ private:
 	int _loopCounter = 0;
 	int _synCount = 10;
 
-	void PullEvent();
+	void PullEvent(float currgametime);
 	void SynchronisePosition();
-	void PerformDR();
+	void PerformDR(GameObject* ship, float currgametime, float drtime, Vector2 accleration);
 
 	float Wrap(float x, float x0, float x1);
 	float acceleration_speed = 40.0f;
