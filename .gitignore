@@ -49,3 +49,11 @@ cs260A4/cs260A4/x64/Debug/Vector2.obj
 cs260A4/cs260A4/x64/Debug/WindowSystem.obj
 cs260A4/x64/Debug/cs260A4.exe
 cs260A4/x64/Debug/cs260A4.pdb
+cs260A4/cs260A4/x64/Debug/ApplicationCommands.obj
+cs260A4/cs260A4/x64/Debug/clientUDPSocket.obj
+cs260A4/cs260A4/x64/Debug/cs260A4.Build.CppClean.log
+cs260A4/cs260A4/x64/Debug/cs260A4.tlog/CL.write.1.tlog
+cs260A4/cs260A4/x64/Debug/cs260A4.vcxproj.FileListAbsolute.txt
+cs260A4/cs260A4/x64/Debug/GameCommands.obj
+cs260A4/cs260A4/x64/Debug/MessageFormat.obj
+cs260A4/cs260A4/x64/Debug/NetworkSystem.obj
