@@ -17,6 +17,11 @@ void LogicSystem::Update(const InputSystem& inputsystem, float dt)
 
 		// broadcast this acceleration to all other client
 
+		// send move command with accel
+		// so that other client perform DR
+
+
+
 		// end broadcast
 
 		ship->rigidbody.velocity = ship->rigidbody.velocity + accel;
@@ -61,6 +66,37 @@ void LogicSystem::Update(const InputSystem& inputsystem, float dt)
 
 		// end broadcast
 	}
+
+	_loopCounter++;
+	if (_loopCounter >= _synCount)
+	{
+		_loopCounter = 0;
+		SynchronisePosition();
+	}
+}
+
+void LogicSystem::PullEvent()
+{
+	// while event list not empty, pull events
+	while (!EventsList.empty())
+	{
+		// if theres a move command, perform DR
+	}
+}
+
+void LogicSystem::SynchronisePosition()
+{
+	// send a syn command, of player position, rotation, velocity
+}
+
+void LogicSystem::PerformDR()
+{
+	// extrapolate the position base on time difference
+
+	// receive a ship player to perform DR
+	// receive the game time of the sender
+	// find the time difference, game time on this client - game time of sender
+	// calculate the DR position
 }
 
 float LogicSystem::Wrap(float x, float x0, float x1)

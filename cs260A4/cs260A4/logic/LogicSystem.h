@@ -56,6 +56,12 @@ public:
 
 private:
 
+	int _loopCounter = 0;
+	int _synCount = 10;
+
+	void PullEvent();
+	void SynchronisePosition();
+	void PerformDR();
 
 	float Wrap(float x, float x0, float x1);
 	float acceleration_speed = 40.0f;
