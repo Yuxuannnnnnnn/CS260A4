@@ -6,6 +6,7 @@
 #include <mutex>
 #include <functional>
 #include "DRData.h"
+#include "../core/GameObject.h"
 
 //for event
 #include "../network/MessageFormat.h"

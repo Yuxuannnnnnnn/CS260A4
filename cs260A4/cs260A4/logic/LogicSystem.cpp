@@ -23,7 +23,7 @@ void LogicSystem::Update(const InputSystem& inputsystem, float dt, float gametim
 
 		// DOTO:: get the player index
 		int playerindex = 0;
-		DRData drdata{ accel.x, accel.y, gametime, playerindex};
+		DRData drdata{ accel.x, accel.y, gametime, playerindex };
 		_InsertNotification(GameCommands::MoveForward, { {(char*)&drdata, sizeof(DRData)} });
 
 		// end broadcast
@@ -88,42 +88,43 @@ void LogicSystem::Update(const InputSystem& inputsystem, float dt, float gametim
 void LogicSystem::PullEvent(float currgametime)
 {
 	// while event list not empty, pull events
-	for(auto& eventpair : EventsList)
-	{
-		auto command = eventpair.first;
-		switch (command)
-		{
-		case GameCommands::MoveForward:
-			DRData drdata;
-			memcpy(&drdata, &(eventpair.second[0]), sizeof(DRData));
-			
-			// find the correct player index from Gameobj container from factory
+	//for (auto& eventpair : EventsList)
+	//{
+	//	auto command = eventpair.first;
+	//	switch (command)
+	//	{	
+	//	case (int)GameCommands::MoveForward:
+	//		DRData drdata;
+	//		playerIndex index = eventpair.first;
+	//		memcpy(&drdata, &(eventpair.second[0]), sizeof(DRData));
 
-			GameObject* player = nullptr;
+	//		// find the correct player index from Gameobj container from factory
 
-
-
-			break;
-		case GameCommands::MoveBackward:
-			DRData drdata;
-			memcpy(&drdata, &(eventpair.second[0]), sizeof(DRData));
-
-			// find the correct player index from Gameobj container from factory
-
-			GameObject* player = nullptr;
-			PerformDR(player, currgametime, drdata.gametime, Vector2{ drdata.accelx, drdata.accely });
-
-
-			break;
-		case GameCommands::RotateLeft:
+	//		GameObject* player = nullptr;
 
 
 
-		}
+	//		break;
+	//	case (int)GameCommands::MoveBackward:
+	//		DRData drdata;
+	//		memcpy(&drdata, &(eventpair.second[0]), sizeof(DRData));
 
-	}
+	//		// find the correct player index from Gameobj container from factory
 
-	EventsList.clear();
+	//		GameObject* player = nullptr;
+	//		PerformDR(player, currgametime, drdata.gametime, Vector2{ drdata.accelx, drdata.accely });
+
+
+	//		break;
+	//	case (int)GameCommands::RotateLeft:
+
+
+
+	//	}
+
+	//}
+
+	//EventsList.clear();
 }
 
 void LogicSystem::SynchronisePosition()
@@ -134,9 +135,9 @@ void LogicSystem::SynchronisePosition()
 
 void LogicSystem::PerformDR(GameObject* ship, float currgametime, float drtime, Vector2 accleration)
 {
-	
+
 	float timediff = currgametime - drtime;
-	
+
 	// acceleration already multipled by deltatime before passed in
 	ship->rigidbody.velocity = ship->rigidbody.velocity + accleration;
 
