@@ -9,7 +9,7 @@ enum class GameCommands
 	
 	JoinGame,				//Just Joined the Game					Payload: no payload
 	InGame,					//Already in the Game					Payload: no payload
-	
+	Waiting,
 	
 	MoveForward,
 	MoveBackward,

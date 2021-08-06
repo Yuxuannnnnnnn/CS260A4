@@ -6,7 +6,10 @@
 #include "clientUDPSocket.h"
 
 #include <mutex>
-
+#include "../Tools/Timer.h"
+#include <set>
+#include <string>
+#include <algorithm>
 
 
 
@@ -32,7 +35,7 @@ class NetworkSystem
 	typedef std::function<void(
 		bool isHost,
 		std::vector<int>& playerIndexList,
-		int playerID)> 
+		int playerID)>
 		IndicateHostFunction;
 	IndicateHostFunction _IndicateHost;
 
@@ -40,9 +43,9 @@ class NetworkSystem
 	//own client udp socket
 	clientUDPSocket clientUDPsock;
 
-	int PlayerIndex = 0;
+	volatile int PlayerIndex = 0;
 	std::mutex PlayerIndexMutex;
-
+	bool inUse;
 
 	//stores indices to get ClientSockIndex
 	typedef int playerInd;
@@ -53,14 +56,15 @@ class NetworkSystem
 	std::mutex playerIndicesMutex;
 
 
-
+	std::vector<int> receivedIndexList;
 	//List of notifications for the networkSystem to send during update()
 	std::vector<Message> notificationList;
-
-
+	Timer _timer;
+	std::set<int> uniqueindexlist;
+	std::vector<int> usedIndexList;
 public:
 
-	void Init(const InsertEventFunction& InsertEvent, 
+	void Init(const InsertEventFunction& InsertEvent,
 		const IndicateHostFunction& IndicateHost)
 	{
 		//get function to insert events to logicSystem
@@ -73,7 +77,7 @@ public:
 		clientUDPsock.Startup();
 	}
 
-//------------------------------------------------------------------------------------
+	//------------------------------------------------------------------------------------
 
 
 	void Wait_ToConnectAllClients(Hostname_Port_List& list)
@@ -88,25 +92,25 @@ public:
 		for (size_t i = 1; i < list.size(); i++)
 		{
 			//store the address index returned from the function
-				clientUDPsock.Get_Store_ClientAddress(
-				list[i].second, 
+			clientUDPsock.Get_Store_ClientAddress(
+				list[i].second,
 				list[i].first);
 
 		}
-		
 
 
-//-------------------Wait for all Clients to connect-------------------------
+
+		//-------------------Wait for all Clients to connect-------------------------
 
 		typedef int Index;
-		std::unordered_map<Index, sockaddr>& clientAddressIndices = 
+		std::unordered_map<Index, sockaddr>& clientAddressIndices =
 			clientUDPsock.GetIndexAddrList();
 
 		//wait for clients to respond
 		std::vector<std::thread> clientThreads;
 
 		//run each thread for each receiving address
-		for (auto& pair: clientAddressIndices)
+		for (auto& pair : clientAddressIndices)
 		{
 			//get the clientAddressIndex
 			int clientIndex = pair.first;
@@ -117,13 +121,47 @@ public:
 				std::ref(*this), clientIndex });
 		}
 
-	//send a packet to all players that this client has just joinedGame
-	//all players who received this message should know
-	//this player's sockaddr
+		//send a packet to all players that this client has just joinedGame
+		//all players who received this message should know
+		//this player's sockaddr
+
+		_timer.Start();
+
 		Message JoinedGameMessage = CreateClientMessage(
 			GameCommands::JoinGame);
 		clientUDPsock.BroadcastMessage(JoinedGameMessage);
 
+
+		// wait for 2 second
+		while (_timer.GetDuration() < 2.3f)
+		{
+
+		}
+
+
+
+		std::cout << "My player index is : " << PlayerIndex << std::endl;
+		std::cout << std::endl;
+		std::cout << "The number of client waiting was : " << uniqueindexlist.size() << std::endl;
+		std::cout << std::endl;
+
+
+		for (auto i : uniqueindexlist)
+		{
+			std::cout << i << std::endl;
+		}
+
+		while (1)
+		{
+			Timer t;
+			while (t.GetDuration() < 0.5f)
+			{
+
+			}
+			Message WaitingMessage = CreateClientMessage(
+				GameCommands::Waiting);
+			clientUDPsock.BroadcastMessage(WaitingMessage);
+		}
 
 		//wait for all clients to join
 		for (size_t i = 0; i < clientThreads.size(); i++)
@@ -138,9 +176,11 @@ public:
 			_IndicateHost(true, playerIndices, PlayerIndex);
 		}
 
-//---------------All clients have connected from this point-------------------------
 
-		//broadcast to everyone, my player Index
+
+		//---------------All clients have connected from this point-------------------------
+
+				//broadcast to everyone, my player Index
 		Message SendIndexMessage = CreateClientMessage(
 			GameCommands::SendIndex, { {(char*)&PlayerIndex, sizeof(PlayerIndex)} });
 		clientUDPsock.BroadcastMessage(SendIndexMessage);
@@ -204,6 +244,9 @@ public:
 	void WaitClientConnect(int clientAddressIndex)
 	{
 		//continuously receiveMessage from this client
+
+
+
 		while (true)
 		{
 			GameCommands Command = GameCommands::TotalCommands;
@@ -217,17 +260,29 @@ public:
 				Command,
 				message);
 
+			if (Command == GameCommands::Waiting)
+			{
+				// count the number of unique player index
+				if (_timer.GetDuration() < 2.2f)
+				{
+					uniqueindexlist.insert(clientAddressIndex);
+				}
+			}
+
 			//wait for clients to respond that they are already inGame
 			if (Command == GameCommands::InGame)
 			{
-				//count the number of players already in the game
-				//so that I can assign a playerID to myself at the end
-				std::lock_guard<std::mutex> IndexCounterLock{ PlayerIndexMutex };
-				PlayerIndex ++;
+				if (_timer.GetDuration() < 2.3f)
+				{
 
+					//count the number of players already in the game
+					//so that I can assign a playerID to myself at the end
+					std::lock_guard<std::mutex> IndexCounterLock{ PlayerIndexMutex };
+					++PlayerIndex;
+				}
 				char buffer[100] = "\0";
 
-				std::cout << "Client" 
+				std::cout << "Client"
 					<< inet_ntop(AF_INET, &clientUDPsock.Index_Addresses[clientAddressIndex],
 						buffer, 100)
 					<< "is in game." << std::endl;
@@ -241,14 +296,33 @@ public:
 			{
 				Message InGameMessage = CreateClientMessage(
 					GameCommands::InGame);
+
 				//clientUDPsock.SendClientMessage(clientAddressIndex, InGameMessage);
-				clientUDPsock.BroadcastMessage(InGameMessage, clientAddressIndex);
+				//clientUDPsock.BroadcastMessage(InGameMessage, clientAddressIndex);
+				Timer t1;
+				//t1.Start();
+				////while (t1.GetDuration() < (float)PlayerIndex / 2);
+
+				//while (t1.GetDuration() < (float)PlayerIndex / 3.0f);
+
+				clientUDPsock.BroadcastMessage(InGameMessage);
+
+
+				/*	Timer t;
+					while (t.GetDuration() < 0.5f)
+					{
+
+					}
+					Message WaitingMessage = CreateClientMessage(
+						GameCommands::Waiting);
+					clientUDPsock.BroadcastMessage(WaitingMessage);*/
+
 				char buffer[100] = "\0";
 
-				std::cout << "Client"
+				/*std::cout << "Client"
 					<< inet_ntop(AF_INET, &clientUDPsock.Index_Addresses[clientAddressIndex],
 						buffer, 100)
-					<< "has joined game." << std::endl;
+					<< "has joined game." << std::endl;*/
 
 
 
@@ -257,11 +331,11 @@ public:
 		}
 	}
 
-//------------------------------------------------------------------------------------
+	//------------------------------------------------------------------------------------
 
 
-	//callback function for all the other systems to use
-	//when they have a message to notify all other clients
+		//callback function for all the other systems to use
+		//when they have a message to notify all other clients
 	void InsertNotification(const GameCommands& command,
 		const std::vector<Message> messageList = std::vector<Message>{})
 	{
@@ -339,16 +413,16 @@ public:
 
 
 
-//------------------------------------------------------------------------------------
-	
-	//Inside GameLoop
-	//send notifications to all other clients
+	//------------------------------------------------------------------------------------
+
+		//Inside GameLoop
+		//send notifications to all other clients
 	void BroadcastEventsToClients()
 	{
 		//loop through the notifiications List
 		//then broadcast the messages to all clients
 
-		for (auto& notif: notificationList)
+		for (auto& notif : notificationList)
 		{
 			clientUDPsock.BroadcastMessage(notif);
 		}
@@ -356,7 +430,7 @@ public:
 
 
 
-//--------------------------------------------------------------------------------
+	//--------------------------------------------------------------------------------
 
 
 
@@ -365,7 +439,7 @@ public:
 		std::vector<std::thread> clientThreads;
 
 		//run each thread for each receiving address
-		for (auto& pair: PlayerIndex_ClientSockIndex)
+		for (auto& pair : PlayerIndex_ClientSockIndex)
 		{
 			//get the clientAddressIndex
 			int clientIndex = pair.second;
@@ -382,7 +456,7 @@ public:
 			clientThreads[i].join();
 		}
 	}
-	
+
 	void ReceiveEventFromClient(int clientAddressIndex)
 	{
 		int playerIndex = -1;
