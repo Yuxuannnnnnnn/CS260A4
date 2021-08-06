@@ -102,13 +102,6 @@ public:
 		std::unordered_map<Index, sockaddr>& clientAddressIndices = 
 			clientUDPsock.GetIndexAddrList();
 
-		//send a packet to all players that this client has just joinedGame
-		//all players who received this message should know
-		//this player's sockaddr
-		Message JoinedGameMessage = CreateClientMessage(
-			GameCommands::JoinGame);
-		clientUDPsock.BroadcastMessage(JoinedGameMessage);
-
 		//wait for clients to respond
 		std::vector<std::thread> clientThreads;
 
@@ -123,6 +116,14 @@ public:
 				&NetworkSystem::WaitClientConnect,
 				std::ref(*this), clientIndex });
 		}
+
+	//send a packet to all players that this client has just joinedGame
+	//all players who received this message should know
+	//this player's sockaddr
+		Message JoinedGameMessage = CreateClientMessage(
+			GameCommands::JoinGame);
+		clientUDPsock.BroadcastMessage(JoinedGameMessage);
+
 
 		//wait for all clients to join
 		for (size_t i = 0; i < clientThreads.size(); i++)
@@ -223,7 +224,16 @@ public:
 				//so that I can assign a playerID to myself at the end
 				std::lock_guard<std::mutex> IndexCounterLock{ PlayerIndexMutex };
 				PlayerIndex ++;
+
+				char buffer[100] = "\0";
+
+				std::cout << "Client" 
+					<< inet_ntop(AF_INET, &clientUDPsock.Index_Addresses[clientAddressIndex],
+						buffer, 100)
+					<< "is in game." << std::endl;
+
 				break;
+
 			}
 			//if clients never respond, then wait for them to send a joinedGame notification
 			//Respond to the client an InGame notification
@@ -232,6 +242,13 @@ public:
 				Message InGameMessage = CreateClientMessage(
 					GameCommands::InGame);
 				clientUDPsock.SendClientMessage(clientAddressIndex, InGameMessage);
+
+				char buffer[100] = "\0";
+
+				std::cout << "Client"
+					<< inet_ntop(AF_INET, &clientUDPsock.Index_Addresses[clientAddressIndex],
+						buffer, 100)
+					<< "has joined game." << std::endl;
 				break;
 			}
 		}

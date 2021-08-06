@@ -353,8 +353,7 @@ public:
         for (auto& address: Index_Addresses)
         {
             SendClientMessage(
-                address.first,
-                message);
+                address.first, message);
         }
     }
 
