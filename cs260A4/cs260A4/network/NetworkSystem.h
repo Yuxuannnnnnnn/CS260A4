@@ -241,14 +241,17 @@ public:
 			{
 				Message InGameMessage = CreateClientMessage(
 					GameCommands::InGame);
-				clientUDPsock.SendClientMessage(clientAddressIndex, InGameMessage);
-
+				//clientUDPsock.SendClientMessage(clientAddressIndex, InGameMessage);
+				clientUDPsock.BroadcastMessage(InGameMessage, clientAddressIndex);
 				char buffer[100] = "\0";
 
 				std::cout << "Client"
 					<< inet_ntop(AF_INET, &clientUDPsock.Index_Addresses[clientAddressIndex],
 						buffer, 100)
 					<< "has joined game." << std::endl;
+
+
+
 				break;
 			}
 		}

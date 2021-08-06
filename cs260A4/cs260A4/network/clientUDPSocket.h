@@ -347,13 +347,29 @@ public:
 
 
     //send the message to all clients
-    void BroadcastMessage(const Message& message)
+    void BroadcastMessage(const Message& message, int index = -1)
     {
-        //send the message to all clients
-        for (auto& address: Index_Addresses)
+        if (index == -1)
         {
-            SendClientMessage(
-                address.first, message);
+
+            //send the message to all clients
+            for (auto& address : Index_Addresses)
+            {
+                SendClientMessage(
+                    address.first, message);
+            }
+        }
+        else
+        {
+            for (auto& address : Index_Addresses)
+            {
+                if (address.first == index)
+                {
+                    SendClientMessage(
+                        address.first, message);
+                    break;
+                }
+            }
         }
     }
 
