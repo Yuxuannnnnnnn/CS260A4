@@ -317,6 +317,8 @@ public:
 						GameCommands::Waiting);
 					clientUDPsock.BroadcastMessage(WaitingMessage);*/
 
+				//while (!clientUDPsock.SendClientMessage(clientAddressIndex, InGameMessage));
+
 				char buffer[100] = "\0";
 
 				/*std::cout << "Client"
