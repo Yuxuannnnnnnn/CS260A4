@@ -47,6 +47,7 @@ void Game::Run(Hostname_Port_List& list)
 	//wait for all clients to be online first
 	//before starting game
 
+#define Test
 #ifdef Test
 
 	typedef std::vector<int> clientIndicesList;
