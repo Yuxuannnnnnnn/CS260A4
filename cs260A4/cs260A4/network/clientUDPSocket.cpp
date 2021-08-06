@@ -214,7 +214,7 @@ int clientUDPSocket::udt_receive(
     //convert rate [0, 1] to [0, 100]
 
     //100% chance - no packets is dropped
-    int rate = 100;//(int)(RateOfPacketLoss_ * 100.0f);
+    int rate = 0;//(int)(RateOfPacketLoss_ * 100.0f);
 
 
     //blocking call that receives bytes from the clientSocket
