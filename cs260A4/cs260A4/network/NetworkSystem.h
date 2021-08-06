@@ -98,8 +98,7 @@ public:
 
 		}
 
-		char broadcast = 1;
-		setsockopt(clientUDPsock.clientUDPSock_, SOL_SOCKET, SO_BROADCAST, &broadcast, sizeof(broadcast));
+
 
 		//-------------------Wait for all Clients to connect-------------------------
 
