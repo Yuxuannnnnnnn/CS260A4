@@ -6,7 +6,8 @@
 
 
 
-Game::Game(HINSTANCE hinstance, int nCmdShow, unsigned width, unsigned height) :
+Game::Game(HINSTANCE hinstance, int nCmdShow, unsigned width, unsigned height, 
+	Hostname_Port_List& list) :
 	_windowSystem{ hinstance, nCmdShow, width, height },
 	_isGameRunning{ true }
 {
@@ -14,22 +15,20 @@ Game::Game(HINSTANCE hinstance, int nCmdShow, unsigned width, unsigned height) :
 	_graphicsSystem.Init(_windowSystem.GetHandle());
 
 	_networkSystem.Init(
+		list,
 		std::bind(&LogicSystem::InsertEvent, 
 		&_logicSystem, 
 		std::placeholders::_1, 
-		std::placeholders::_2), 
-		std::bind(&LogicSystem::HostPlayer,
-			&_logicSystem,
-			std::placeholders::_1, 
-			std::placeholders::_2,
-			std::placeholders::_3));
+		std::placeholders::_2));
 
 
 	_logicSystem.Init(
 		std::bind(&NetworkSystem::InsertNotification,
 			&_networkSystem,
 			std::placeholders::_1,
-			std::placeholders::_2));
+			std::placeholders::_2, 
+			std::placeholders::_3), 
+		list.size());
 
 	_gametime.Start();
 }
@@ -41,7 +40,7 @@ bool Game::GameIsRunning() const
 }
 
 //update loop - per frame
-void Game::Run(Hostname_Port_List& list)
+void Game::Run()
 {
 
 	//wait for all clients to be online first
@@ -50,19 +49,17 @@ void Game::Run(Hostname_Port_List& list)
 #define Test
 #ifdef Test
 
-	typedef std::vector<int> clientIndicesList;
-	clientIndicesList indicesList;
-	_networkSystem.Wait_ToConnectAllClients(list);
-
-
-	//the network system runs multiple threads
-	//to receive packets from socket 
+	//the network system runs a seperate thread
+	//to receive messages from socket 
 	//from each address
 	std::thread NetworkSystem_Thread{
-			&NetworkSystem::ReceiveEvents,
+			&NetworkSystem::ReceiveEventsFromClient,
 			std::ref(_networkSystem) };
 
 #endif
+
+
+	_logicSystem.Wait_ForAllPlayers();
 
 
 	while (GameIsRunning())
@@ -75,9 +72,6 @@ void Game::Run(Hostname_Port_List& list)
 		_inputSystem.Update();						//get inputs
 		_logicSystem.Update(_inputSystem, dt, _gametime.GetDuration());  //check player logic in input
 		
-
-		//send notifications to all other clients
-		_networkSystem.BroadcastEventsToClients();
 		
 		_physicSystem.Update();						//update physics
 

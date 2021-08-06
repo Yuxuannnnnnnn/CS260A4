@@ -20,10 +20,11 @@ public:
 	Game(HINSTANCE hinstance, 
 		int nCmdShow, 
 		unsigned width, 
-		unsigned height);
+		unsigned height, 
+		Hostname_Port_List& list);
 	bool GameIsRunning() const;
 
-	void Run(Hostname_Port_List& list);
+	void Run();
 
 
 private:

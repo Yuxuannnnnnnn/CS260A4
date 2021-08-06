@@ -43,6 +43,8 @@ the Client Socket.
 #include "GameCommands.h"
 #include "../Tools/Timer.h"
 
+#include "../Tools/EngineSettings.h" //for PRINTOUT()
+
 
 /*******************************************************************************
  * A simple UDP/IP client application
@@ -77,7 +79,7 @@ public:
 		//during receiving of data over UDP.
 	float RateOfPacketLoss_{ 0.0f };
 
-	//-------------------------------------------------------------------------
+//-----------------------Initialisation functions-----------------------------
 
 		//default constructor
 	clientUDPSocket()
@@ -116,11 +118,6 @@ public:
 		const std::string& clientHostNameString);
 
 
-	std::unordered_map<Index, sockaddr>& GetIndexAddrList()
-	{
-		return Index_Addresses;
-	}
-
 	//int getClientIndex(sockaddr addr)
 	//{
 	//    for (auto& IndexAddr: Index_Addresses)
@@ -132,7 +129,7 @@ public:
 	//    }
 	//}
 
-//-------------------------------------------------------------------------
+//--------------------Helper Functions---------------------------------
 
 
 	//Call by internal function ReceiveMessage()
@@ -142,24 +139,42 @@ public:
 	int udt_receive(
 		char buffer[],
 		size_t BUFFER_SIZE,
-		sockaddr addr,
+		sockaddr& addr,
 		int AddressSize);
 
-	//-------------------------------------------------------------------------
 
+	std::unordered_map<Index, sockaddr>& GetIndexAddrList()
+	{
+		return Index_Addresses;
+	}
+
+	Index findclientIndex(sockaddr addr)
+	{
+		for (auto& addrPair : Index_Addresses)
+		{
+			//find the pair with the sockaddr
+			if (!memcmp(&addrPair.second, &addr, sizeof(addr)))
+			{
+				return addrPair.first;
+			}
+		}
+	}
+
+
+//---------------------------Receiving & Sending Message Functions-------------------------------------
 
 		//Receives Message from Client
 		//returns true if the message is successfully received from client
 		//returns false if client has disconnected
 	int ReceiveMessage(
-		int AddrIndex,
+		int& AddrIndex,
 		GameCommands& Command,
 		std::vector<Message>& message)
 
 	{
-
-		//get client adress to send message to
-		sockaddr addr = Index_Addresses[AddrIndex];
+		//get the client address to check which client
+		//has sent the message
+		sockaddr addr{};
 		int AddressSize = sizeof(addr);
 
 		//Message Buffer size
@@ -169,7 +184,6 @@ public:
 
 		//The total message from the Client
 		char messageFromClient[BUFFER_SIZE] = "\0";
-
 
 		char command = -1;
 		int LengthOfPayload = -1;
@@ -306,6 +320,11 @@ public:
 			}
 		}
 
+		//get the index of the client sock address
+		AddrIndex = findclientIndex(addr);
+
+		char buffer1[100] = "\0";
+		PRINTOUT("Received Message from Client ", inet_ntop(AF_INET, &addr, buffer1, 100), ". ");
 		return 1;
 
 	}
@@ -360,7 +379,7 @@ public:
 
 	}
 
-	//-------------------------------------------------------------------------
+//------------------------Shutdown functions---------------------------
 
 	   //Shutdown and close clientSocket
 	void disconnect();

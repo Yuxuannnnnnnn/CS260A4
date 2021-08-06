@@ -7,6 +7,7 @@
 
 #include <mutex>
 #include "../Tools/Timer.h"
+#include "../Tools/EngineSettings.h"
 #include <set>
 #include <string>
 #include <algorithm>
@@ -24,6 +25,7 @@ class NetworkSystem
 	typedef std::string PortString;
 	typedef  std::vector<std::pair<HostnameString, PortString>> Hostname_Port_List;
 
+
 	//function to insert an event to the logicSystem Eventlist
 	typedef std::vector<Message> message;
 	typedef std::pair<GameCommands, message> Event;
@@ -31,57 +33,30 @@ class NetworkSystem
 		InsertEventFunction;
 	InsertEventFunction _InsertEvent;
 
-	//function to let the logicSystem know if this player is the host
-	typedef std::function<void(
-		bool isHost,
-		std::vector<int>& playerIndexList,
-		int playerID)>
-		IndicateHostFunction;
-	IndicateHostFunction _IndicateHost;
-
 
 	//own client udp socket
 	clientUDPSocket clientUDPsock;
 
-	volatile int PlayerIndex = 0;
-	std::mutex PlayerIndexMutex;
-	bool inUse;
 
-	//stores indices to get ClientSockIndex
-	typedef int playerInd;
-	typedef int ClientSockInd;
-	std::unordered_map<playerInd, ClientSockInd> PlayerIndex_ClientSockIndex;
-	typedef std::vector<int> playerIndexList;
-	playerIndexList playerIndices;
-	std::mutex playerIndicesMutex;
-
-
-	std::vector<int> receivedIndexList;
 	//List of notifications for the networkSystem to send during update()
 	std::vector<Message> notificationList;
-	Timer _timer;
-	std::set<int> uniqueindexlist;
-	std::vector<int> usedIndexList;
+
+
 public:
 
-	void Init(const InsertEventFunction& InsertEvent,
-		const IndicateHostFunction& IndicateHost)
+//--------------------Initialise the NetworkSystem------------------------------------
+
+
+	//Initialise the NetworkSystem
+	void Init(Hostname_Port_List& list,
+		const InsertEventFunction& InsertEvent)
 	{
 		//get function to insert events to logicSystem
 		_InsertEvent = InsertEvent;
-		//get function to let the logicSystem know if this player is the host
-		_IndicateHost = IndicateHost;
-
 
 		//Start up winsock
 		clientUDPsock.Startup();
-	}
 
-	//------------------------------------------------------------------------------------
-
-
-	void Wait_ToConnectAllClients(Hostname_Port_List& list)
-	{
 		//Bind own UDP socket
 		clientUDPsock.Prep_UDPClientSocket(
 			//get own Port number
@@ -97,253 +72,31 @@ public:
 				list[i].first);
 
 		}
-
-
-
-		//-------------------Wait for all Clients to connect-------------------------
-
-		typedef int Index;
-		std::unordered_map<Index, sockaddr>& clientAddressIndices =
-			clientUDPsock.GetIndexAddrList();
-
-		//wait for clients to respond
-		std::vector<std::thread> clientThreads;
-
-		//run each thread for each receiving address
-		for (auto& pair : clientAddressIndices)
-		{
-			//get the clientAddressIndex
-			int clientIndex = pair.first;
-
-			//start a thread to receive events from each client
-			clientThreads.push_back(std::thread{
-				&NetworkSystem::WaitClientConnect,
-				std::ref(*this), clientIndex });
-		}
-
-		//send a packet to all players that this client has just joinedGame
-		//all players who received this message should know
-		//this player's sockaddr
-
-		_timer.Start();
-
-		Message JoinedGameMessage = CreateClientMessage(
-			GameCommands::JoinGame);
-		clientUDPsock.BroadcastMessage(JoinedGameMessage);
-
-
-		// wait for 2 second
-		while (_timer.GetDuration() < 2.3f)
-		{
-
-		}
-
-
-
-		std::cout << "My player index is : " << PlayerIndex << std::endl;
-		std::cout << std::endl;
-		std::cout << "The number of client waiting was : " << uniqueindexlist.size() << std::endl;
-		std::cout << std::endl;
-
-
-		for (auto i : uniqueindexlist)
-		{
-			std::cout << i << std::endl;
-		}
-
-		while (1)
-		{
-			Timer t;
-			while (t.GetDuration() < 0.5f)
-			{
-
-			}
-			Message WaitingMessage = CreateClientMessage(
-				GameCommands::Waiting);
-			clientUDPsock.BroadcastMessage(WaitingMessage);
-		}
-
-		//wait for all clients to join
-		for (size_t i = 0; i < clientThreads.size(); i++)
-		{
-			clientThreads[i].join();
-		}
-		clientThreads.clear();
-
-		//One client will be the host
-		if (PlayerIndex == 0)
-		{
-			_IndicateHost(true, playerIndices, PlayerIndex);
-		}
-
-
-
-		//---------------All clients have connected from this point-------------------------
-
-				//broadcast to everyone, my player Index
-		Message SendIndexMessage = CreateClientMessage(
-			GameCommands::SendIndex, { {(char*)&PlayerIndex, sizeof(PlayerIndex)} });
-		clientUDPsock.BroadcastMessage(SendIndexMessage);
-
-
-		//run each thread for each receiving address
-		for (auto& pair : clientAddressIndices)
-		{
-			//get the clientAddressIndex
-			int clientIndex = pair.first;
-
-			//start a thread to receive events from each client
-			clientThreads.push_back(std::thread{
-				&NetworkSystem::WaitClientAnnounceIndex,
-				std::ref(*this), clientIndex });
-		}
-
-		//wait for all clients to join
-		for (size_t i = 0; i < clientThreads.size(); i++)
-		{
-			clientThreads[i].join();
-		}
-
 	}
 
 
-	void WaitClientAnnounceIndex(int clientAddressIndex)
-	{
-		//continuously receiveMessage from this client
-		while (true)
-		{
-			GameCommands Command = GameCommands::TotalCommands;
-			std::vector<Message> message;
-
-			int success = 1;
-
-			//receive client Command and Messages
-			success = clientUDPsock.ReceiveMessage(
-				clientAddressIndex,
-				Command,
-				message);
-
-			//wait for clients to respond their playerIndex
-			if (Command == GameCommands::SendIndex)
-			{
-				//extract playerID
-				int playerID = -1;
-				memcpy(&playerID, message[0].message, message[0].size_);
-				//store playerID with the clientAddressID
-				PlayerIndex_ClientSockIndex[playerID] = clientAddressIndex;
-
-				std::lock_guard<std::mutex> playerIndiceslock(playerIndicesMutex);
-				playerIndices.push_back(playerID);
-				break;
-			}
-		}
-	}
-
-	//helper function for Wait_ToConnectAllClients()
-	//to run per thread for each receiving client
-	void WaitClientConnect(int clientAddressIndex)
-	{
-		//continuously receiveMessage from this client
+//--------------------for all the other systems to use------------------------------------
 
 
-
-		while (true)
-		{
-			GameCommands Command = GameCommands::TotalCommands;
-			std::vector<Message> message;
-
-			int success = 1;
-
-			//receive client Command and Messages
-			success = clientUDPsock.ReceiveMessage(
-				clientAddressIndex,
-				Command,
-				message);
-
-			if (Command == GameCommands::Waiting)
-			{
-				// count the number of unique player index
-				if (_timer.GetDuration() < 2.2f)
-				{
-					uniqueindexlist.insert(clientAddressIndex);
-				}
-			}
-
-			//wait for clients to respond that they are already inGame
-			if (Command == GameCommands::InGame)
-			{
-				if (_timer.GetDuration() < 2.3f)
-				{
-
-					//count the number of players already in the game
-					//so that I can assign a playerID to myself at the end
-					std::lock_guard<std::mutex> IndexCounterLock{ PlayerIndexMutex };
-					++PlayerIndex;
-				}
-				char buffer[100] = "\0";
-
-				std::cout << "Client"
-					<< inet_ntop(AF_INET, &clientUDPsock.Index_Addresses[clientAddressIndex],
-						buffer, 100)
-					<< "is in game." << std::endl;
-
-				break;
-
-			}
-			//if clients never respond, then wait for them to send a joinedGame notification
-			//Respond to the client an InGame notification
-			else if (Command == GameCommands::JoinGame)
-			{
-				Message InGameMessage = CreateClientMessage(
-					GameCommands::InGame);
-
-				//clientUDPsock.SendClientMessage(clientAddressIndex, InGameMessage);
-				//clientUDPsock.BroadcastMessage(InGameMessage, clientAddressIndex);
-				Timer t1;
-				//t1.Start();
-				////while (t1.GetDuration() < (float)PlayerIndex / 2);
-
-				//while (t1.GetDuration() < (float)PlayerIndex / 3.0f);
-
-				clientUDPsock.BroadcastMessage(InGameMessage);
-
-
-				/*	Timer t;
-					while (t.GetDuration() < 0.5f)
-					{
-
-					}
-					Message WaitingMessage = CreateClientMessage(
-						GameCommands::Waiting);
-					clientUDPsock.BroadcastMessage(WaitingMessage);*/
-
-				//while (!clientUDPsock.SendClientMessage(clientAddressIndex, InGameMessage));
-
-				char buffer[100] = "\0";
-
-				/*std::cout << "Client"
-					<< inet_ntop(AF_INET, &clientUDPsock.Index_Addresses[clientAddressIndex],
-						buffer, 100)
-					<< "has joined game." << std::endl;*/
-
-
-
-				break;
-			}
-		}
-	}
-
-	//------------------------------------------------------------------------------------
-
-
-		//callback function for all the other systems to use
-		//when they have a message to notify all other clients
+	//callback function for all the other systems to use
+	//when they have a message to notify all other clients
 	void InsertNotification(const GameCommands& command,
-		const std::vector<Message> messageList = std::vector<Message>{})
+		const std::vector<Message> messageList = std::vector<Message>{}, 
+		int clientAddressIndex = -1)
 	{
-		notificationList.push_back(CreateClientMessage(command, messageList));
+		//if no clientAddressIndex is indicated in the paramters
+		//then broadcast the message to everyone
+		if(clientAddressIndex == -1)
+			clientUDPsock.BroadcastMessage(CreateClientMessage(command, messageList));
+		else //send to the specific client
+		{
+			clientUDPsock.SendClientMessage(clientAddressIndex,
+				CreateClientMessage(command, messageList));
+		}
+
 	}
 
+	//helper function to create a message segment for socket to send
 	Message CreateClientMessage(
 		const GameCommands& command,
 		const std::vector<Message> messageList = std::vector<Message>{})
@@ -414,62 +167,16 @@ public:
 	}
 
 
+//---------------------Runs Seperate from the MainThread----------------------------
 
-	//------------------------------------------------------------------------------------
-
-		//Inside GameLoop
-		//send notifications to all other clients
-	void BroadcastEventsToClients()
+	void ReceiveEventsFromClient()
 	{
-		//loop through the notifiications List
-		//then broadcast the messages to all clients
-
-		for (auto& notif : notificationList)
-		{
-			clientUDPsock.BroadcastMessage(notif);
-		}
-	}
-
-
-
-	//--------------------------------------------------------------------------------
-
-
-
-	void ReceiveEvents()
-	{
-		std::vector<std::thread> clientThreads;
-
-		//run each thread for each receiving address
-		for (auto& pair : PlayerIndex_ClientSockIndex)
-		{
-			//get the clientAddressIndex
-			int clientIndex = pair.second;
-
-			//start a thread to receive events from each client
-			clientThreads.push_back(std::thread{
-				&NetworkSystem::ReceiveEventFromClient,
-				std::ref(*this), clientIndex });
-		}
-
-		//wait for all clients to join
-		for (size_t i = 0; i < clientThreads.size(); i++)
-		{
-			clientThreads[i].join();
-		}
-	}
-
-	void ReceiveEventFromClient(int clientAddressIndex)
-	{
-		int playerIndex = -1;
-
-		for (auto& pair : PlayerIndex_ClientSockIndex)
-			if (pair.second == clientAddressIndex)
-				playerIndex = pair.first;
-
 		//continuously receiveMessage from this client
 		while (true)
 		{
+			//find out which client sent the message
+			int clientAddressIndex = -1;
+
 			GameCommands Command;
 			std::vector<Message> message;
 
@@ -481,14 +188,20 @@ public:
 				Command,
 				message);
 
+
+			//0 - socketerror
+			//2 - 0 bytes received
 			if (success == 0 || success == 2)
 			{
 				//Command = client disconnected
 			}
-
-			//insert the message to the logicSystem eventlist
-			_InsertEvent(playerIndex, //indicates player ID
-				{ Command, message });
+			else
+			{
+				//insert the message to the logicSystem eventlist
+				_InsertEvent(clientAddressIndex, //indicates clientsAddressIndex
+												 //who the message is coming from
+					{ Command, message });
+			}
 		}
 	}
 

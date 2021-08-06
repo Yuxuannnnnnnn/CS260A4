@@ -4,6 +4,11 @@
 #include "../physics/Vector2.h"
 #include "../network/GameCommands.h"
 
+
+
+
+
+
 void LogicSystem::Update(const InputSystem& inputsystem, float dt, float gametime)
 {
 	// find Ship belong to this client
@@ -24,7 +29,9 @@ void LogicSystem::Update(const InputSystem& inputsystem, float dt, float gametim
 		// DOTO:: get the player index
 		int playerindex = 0;
 		DRData drdata{ accel.x, accel.y, gametime, playerindex };
-		_InsertNotification(GameCommands::MoveForward, { {(char*)&drdata, sizeof(DRData)} });
+		_InsertNotification(GameCommands::MoveForward, 
+			{ {(char*)&drdata, sizeof(DRData)} }, 
+			-1);
 
 		// end broadcast
 
@@ -46,7 +53,9 @@ void LogicSystem::Update(const InputSystem& inputsystem, float dt, float gametim
 
 		int playerindex = 0;
 		DRData drdata{ accel.x, accel.y, gametime, playerindex };
-		_InsertNotification(GameCommands::MoveForward, { {(char*)&drdata, sizeof(DRData)} });
+		_InsertNotification(GameCommands::MoveForward, 
+			{ {(char*)&drdata, sizeof(DRData)} }, 
+			-1);
 		// broadcast this acceleration to all other client
 
 		// end broadcast
@@ -63,7 +72,9 @@ void LogicSystem::Update(const InputSystem& inputsystem, float dt, float gametim
 		ship->transform.rotation = Wrap(ship->transform.rotation, -PI, PI);
 
 		// broadcast this acceleration to all other client
-		_InsertNotification(GameCommands::RotateLeft, { {(char*)&ship->transform.rotation, sizeof(ship->transform.rotation)} });
+		_InsertNotification(GameCommands::RotateLeft, 
+			{ {(char*)&ship->transform.rotation, sizeof(ship->transform.rotation)} }, 
+			-1);
 		// end broadcast
 	}
 
@@ -73,7 +84,9 @@ void LogicSystem::Update(const InputSystem& inputsystem, float dt, float gametim
 		ship->transform.rotation = Wrap(ship->transform.rotation, -PI, PI);
 
 		// broadcast this acceleration to all other client
-		_InsertNotification(GameCommands::RotateRight, { {(char*)&ship->transform.rotation, sizeof(ship->transform.rotation)} });
+		_InsertNotification(GameCommands::RotateRight, 
+			{ {(char*)&ship->transform.rotation, sizeof(ship->transform.rotation)} },
+			-1);
 		// end broadcast
 	}
 

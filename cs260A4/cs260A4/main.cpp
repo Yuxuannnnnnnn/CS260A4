@@ -31,10 +31,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	std::unique_ptr<Game> game = 
 		std::make_unique<Game>
 		(hInstance, nCmdShow, 
-			WINDOW_WIDTH, WINDOW_HEIGHT);
+			WINDOW_WIDTH, WINDOW_HEIGHT, 
+			cmdParser.Get_HostName_Port_List());
 
 	//run the game
-	game->Run(cmdParser.Get_HostName_Port_List());
+	game->Run();
 
 	return 0;
 }

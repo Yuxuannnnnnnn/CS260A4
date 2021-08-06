@@ -1,4 +1,5 @@
 #include "ClientUDPSocket.h"
+#include "../Tools/EngineSettings.h"
 
 
 /*******************************************************************************
@@ -187,6 +188,12 @@ int clientUDPSocket::Get_Store_ClientAddress(
     Index_Addresses[clientIndex] = *serverInfo->ai_addr;
 
 
+    char buffer[100] = "\0";
+    std::cout << "Storing Address: "
+        << inet_ntop(AF_INET, &Index_Addresses[clientIndex],
+            buffer, 100)
+        << ". " << std::endl;
+
     //the addrinfo is no longer needed thus free the info
     freeaddrinfo(serverInfo);
 
@@ -204,7 +211,10 @@ int clientUDPSocket::Get_Store_ClientAddress(
 int clientUDPSocket::udt_receive(
     char buffer[], 
     size_t BUFFER_SIZE, 
-    sockaddr addr, 
+
+//get the client address to check which client
+//has sent the message
+    sockaddr& addr, 
     int AddressSize)
 {
     //Initialize random number generator
@@ -225,6 +235,7 @@ int clientUDPSocket::udt_receive(
         (int*)&AddressSize);
     //get a chance from 0 to 100
     int chance = rand() % 100;
+
 
     //if chance is below the rate provided by the config file
     //then drop the packet, and receive the nezt packet
