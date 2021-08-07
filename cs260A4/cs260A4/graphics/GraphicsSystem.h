@@ -4,6 +4,7 @@
 #include "../core/GameObject.h"
 #include <vector>
 #include "Shader.h"
+#include "../core/Factory.h"
 #include <gl/glew.h>
 
 class GraphicsSystem
@@ -38,7 +39,7 @@ public:
 
 	void Init(HWND hwnd);
 	void Update(std::vector<GameObject>& gameobjlist);
-	void Update();
+	void Update(Factory* factory);
 	void LateUpdate();
 	void Exit();
 

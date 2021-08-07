@@ -26,15 +26,12 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 {
 	//constructor open up console
 	Console console;
-
-	/* 
+	/*  test graphics code, delete later
 	    TEST BEGIN
 		*************************
 		KEY : W A S D SPACE
 
-
-		test graphics code, delete later
-		
+	
 		REMOVE THE LINE BELOW (LINE 36) TO COMMENT OUT
 	*/         
 	Transforms trans{ {-50,0},0,{25,15} };

@@ -80,7 +80,7 @@ void Game::Run()
 		
 		_physicSystem.Update();						//update physics
 
-		_graphicsSystem.Update();					//update graphics
+		_graphicsSystem.Update(_factory);					//update graphics
 		_graphicsSystem.LateUpdate();				//update graphics - swap buffer
 
 		//Update factory at the end of loop

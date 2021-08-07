@@ -149,9 +149,14 @@ void GraphicsSystem::Update(std::vector<GameObject>& gameobjlist)
 	//update opengl
 
 	glClearColor(0, 0, 0, 1); //RGBA
-
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	for (auto& gameobj : gameobjlist)
+	{
+		if (gameobj.isActive == false)
+			continue;
+		RenderGameObject(gameobj);
+	}
 	//_shader.use();
 	//
 
@@ -205,19 +210,23 @@ void GraphicsSystem::Update(std::vector<GameObject>& gameobjlist)
 
 
 
-	for (auto& gameobj : gameobjlist)
-	{
-		if (gameobj.isActive == false)
-			continue;
-		RenderGameObject(gameobj);
-	}
+	
 
 
 
 }
 
-void GraphicsSystem::Update()
+void GraphicsSystem::Update(Factory* factory)
 {
+	glClearColor(0, 0, 0, 1); //RGBA
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	//std::cout << factory->gameObjects.size() << std::endl;
+
+	for (auto& pair : factory->gameObjects)
+	{
+		RenderGameObject(pair.second);
+	}
 	// input
 	//Input::KeyboardInput::inst->Update();
 	//if (Input::KeyboardInput::inst->IsKeyTriggered(VK_1))
