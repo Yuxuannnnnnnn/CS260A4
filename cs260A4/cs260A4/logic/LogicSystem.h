@@ -260,22 +260,42 @@ public:
 			auto AsteroidsList = 
 				gameFactory->Create_Asteroids_DataInitialisation();
 
+			//players need to know the number of gameObjects in each message
+			//push number of gameObjects
+			Insert_Number_MessageList(messageList, ShipList.size());
 
 			for (auto& object : ShipList)
 			{
 				//players need to know the gameObjectID of each gameObject
 				//push gameObjectID
+				Insert_Number_MessageList(messageList, object.second);
 
 				//players need to know the details of each gameObjects
 				GameObject& obj = gameFactory->getGameObject(object.second);
-
+				InsertGameObject_MessageList(messageList, obj);
 			}
+			_InsertNotification(GameCommands::SynchronisePlayer, messageList, -1);
 
+
+			messageList.clear();
+
+			//players need to know the number of gameObjects in each message
+			//push number of gameObjects
+			Insert_Number_MessageList(messageList, AsteroidsList.size());
 
 			for (auto& object : AsteroidsList)
 			{
+				//players need to know the gameObjectID of each gameObject
+				//push gameObjectID
+				Insert_Number_MessageList(messageList, object);
 
+				//players need to know the details of each gameObjects
+				GameObject& obj = gameFactory->getGameObject(object);
+				InsertGameObject_MessageList(messageList, obj);
 			}
+
+			_InsertNotification(GameCommands::SyncrhoniseAsteroids, messageList, -1);
+
 
 		}
 	}

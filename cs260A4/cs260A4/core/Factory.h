@@ -139,6 +139,15 @@ public:
 
 //----------------Functions For Systems to call---------------------------
 
+	void insertPlayerID_GameObject(gameObjectID gID, playerID pID)
+	{
+		playerObjectsList[pID] = gID;
+	}
+
+	void insertGameObject(gameObjectID id, const GameObject& gameObject)
+	{
+		gameObjects[id] = gameObject;
+	}
 
 	//SYSTEMS to call this when they want to delete a gameObject
 	void DeleteGameObjectID(gameObjectID id)

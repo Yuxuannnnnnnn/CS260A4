@@ -14,8 +14,6 @@ void LogicSystem::Update(const InputSystem& inputsystem, float dt, float gametim
 {
 
 
-
-
 	// get the reference of Ship belong to this client
 	GameObject& ownship = factory->getOwnPlayer();
 
@@ -137,9 +135,43 @@ void LogicSystem::PullEvent(float currgametime, Factory* factory)
 		clientsAddressIndex clientAddrIndex = events.first;
 		Event event = events.second;
 		GameCommands command = event.first;
+		MessageList messageList = event.second;
 
+		if (command == GameCommands::SynchronisePlayer)
+		{
+			//get number of GameObjects
+			int NumberOfGameObjects = 0;
+			Extract_Number_MessageList(0, messageList, NumberOfGameObjects);
+			for (size_t i = 0; i < NumberOfGameObjects; i++)
+			{
+				int gameObjectID = 0;
+				Extract_Number_MessageList(i + 1, messageList, gameObjectID);
+				
+				GameObject object;
+				ExtractGameObject_MessageList(i + 2, messageList, object);
+				factory->insertGameObject(gameObjectID, object);
+
+				factory->insertPlayerID_GameObject(object.playerIndex, gameObjectID);
+			}
+
+		}
+		else if (command == GameCommands::SyncrhoniseAsteroids)
+		{
+			//get number of GameObjects
+			int NumberOfGameObjects = 0;
+			Extract_Number_MessageList(0, messageList, NumberOfGameObjects);
+			for (size_t i = 0; i < NumberOfGameObjects; i++)
+			{
+				int gameObjectID = 0;
+				Extract_Number_MessageList(i + 1, messageList, gameObjectID);
+
+				GameObject object;
+				ExtractGameObject_MessageList(i + 2, messageList, object);
+				factory->insertGameObject(gameObjectID, object);
+			}
+		}
 		// when player move forward
-		if (command == GameCommands::MoveForward)
+		else if (command == GameCommands::MoveForward)
 		{
 			// get the player index
 		/*	DRData drdata;
