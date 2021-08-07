@@ -8,6 +8,10 @@
 #include "DRData.h"
 #include "../core/GameObject.h"
 
+//for gameObjects creation 
+//store factory pointer in LogicSystem
+#include "../core/Factory.h"
+
 //for event
 #include "../network/MessageFormat.h"
 #include "../network/GameCommands.h"
@@ -67,12 +71,16 @@ class LogicSystem
 	//Own player ID
 	playerID _playerID{0};
 
+	//store factory - for game objects creation
+	Factory* gameFactory;
+
 
 public:
 
 //--------------------Initialise the LogicSystem------------------------------------
 
-	void Init(const InsertNotificationFunction& InsertNotification, 
+	void Init(Factory* factory,
+		const InsertNotificationFunction& InsertNotification, 
 		int NumOfPlayersRequired)
 	{
 		//get function to insert notification to networkSystem
@@ -81,6 +89,8 @@ public:
 		//If the commandline has 4 addresses, the NumOfPlayersRequired will be 4
 		_NumOfPlayersRequired = NumOfPlayersRequired;
 
+		//store factory - for game objects creation
+		gameFactory = factory;
 	}
 
 //--------------------Waiting for players to Join game------------------------------------
@@ -224,6 +234,35 @@ public:
 	void HostPlayer(bool isHost)
 	{
 		_isHost = isHost;
+	}
+
+
+//-------------------------Host Initialisation of Game------------------------------------
+
+
+	void HostInitGame()
+	{
+		//if this client is the host, then is the host responsibility
+		//to define the settings of the asteroids throughout the game & 
+		//and the initial settings of all the player ships
+		if (_isHost)
+		{
+			auto ObjectList = 
+				gameFactory->Create_playerShips_DataInitialisation(
+				_NumOfPlayersRequired,
+				_playerID);
+
+			//players need to know the gameObjectID of each gameObject
+			//players need to know the playerID of each ship
+			//players need to know the details of each gameObjects
+
+			for (auto& object : ObjectList)
+			{
+
+			}
+
+
+		}
 	}
 
 //--------------------------------In the GameLoop------------------------------------

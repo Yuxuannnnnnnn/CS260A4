@@ -11,6 +11,8 @@ Game::Game(HINSTANCE hinstance, int nCmdShow, unsigned width, unsigned height,
 	_windowSystem{ hinstance, nCmdShow, width, height },
 	_isGameRunning{ true }
 {
+	_factory = new Factory{};
+
 	//graphics initialisation
 	_graphicsSystem.Init(_windowSystem.GetHandle());
 
@@ -23,6 +25,7 @@ Game::Game(HINSTANCE hinstance, int nCmdShow, unsigned width, unsigned height,
 
 
 	_logicSystem.Init(
+		_factory,
 		std::bind(&NetworkSystem::InsertNotification,
 			&_networkSystem,
 			std::placeholders::_1,
@@ -70,7 +73,9 @@ void Game::Run()
 		_windowSystem.Update(_isGameRunning);		//Go through all Windows Messages
 
 		_inputSystem.Update();						//get inputs
-		_logicSystem.Update(_inputSystem, dt, _gametime.GetDuration());  //check player logic in input
+		_logicSystem.Update(
+			_inputSystem, 
+			dt, _gametime.GetDuration());  //check player logic in input
 		
 		
 		_physicSystem.Update();						//update physics
@@ -80,7 +85,7 @@ void Game::Run()
 
 		//Update factory at the end of loop
 		//delete all the object in the deletionlist
-		_factory.update();
+		_factory->update();
 
 		//waste time to make it 60 frames per second
 		while (_dt.GetDuration() < dt)

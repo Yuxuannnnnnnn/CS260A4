@@ -33,7 +33,7 @@ private:
 	PhysicSystem _physicSystem;
 	LogicSystem  _logicSystem;
 	GraphicsSystem _graphicsSystem;
-	Factory _factory;
+	Factory * _factory;
 
 //the network system runs multiple threads
 //to receive packets from socket 

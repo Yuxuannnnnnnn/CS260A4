@@ -11,6 +11,10 @@
 
 void LogicSystem::Update(const InputSystem& inputsystem, float dt, float gametime)
 {
+
+
+
+
 	// find Ship belong to this client
 	GameObject* ship = nullptr;
 

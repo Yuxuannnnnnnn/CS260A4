@@ -9,23 +9,28 @@ enum class GameCommands
 	
 	JoinGame,				//Just Joined the Game					Payload: no payload
 	InGame,					//Already in the Game					Payload: no payload
-	Waiting,
-	
+	SendIndex,				//Broadcast PLayerIndex to everyone    Payload: OwnPlayerIndex
+
+
+	//Host will broadcast to all players that the ships are created with the following settings
+	//Host will broadcast to all players that the asteroids are created with the following settings
+	GameObjects_Initialisation,								//Payload: numberOfGameObjects, 
+															//         Each GameObject Details
+
+
+	//Each player will send their own Ship GameObject Details
+	SynchronisePlayer,
+	//Host will broadcast to all players the asteroids updated Details
+	SyncrhoniseAsteroids,
+
+
+
 	MoveForward,
 	MoveBackward,
 	RotateLeft,
 	RotateRight,
 	Shoot,
 
-
-	SendIndex,				//Broadcast PLayerIndex to everyone    Payload: OwnPlayerIndex
-
-
-	//Host will broadcast to all players that the ships are created with the following settings
-	PlayerShipsCreation,											//Payload: Color
-
-	//Host will broadcast to all players that the asteroids are created with the following settings
-	AsteroidsCreation,												//Payload: 
 
 	//For Logic System usage
 	SendAcceleration,
