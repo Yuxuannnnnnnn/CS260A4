@@ -55,12 +55,12 @@ void LogicSystem::Update(const InputSystem& inputsystem, float dt, float gametim
 
 		// size of 
 		
-		DRData drdata{ (float)htonl(accel.x), (float)htonl(accel.y), htonl(gametime), htonl(_playerID) };
+		//DRData drdata{ (float)htonl(accel.x), (float)htonl(accel.y), htonl(gametime), htonl(_playerID) };
 		
 		
-		_InsertNotification(GameCommands::MoveForward,
+	/*	_InsertNotification(GameCommands::MoveForward,
 			{ {(char*)&drdata, sizeof(DRData)} },
-			-1);
+			-1);*/
 
 		// end broadcast
 		ownship.rigidbody.velocity = ownship.rigidbody.velocity + accel;
@@ -79,10 +79,10 @@ void LogicSystem::Update(const InputSystem& inputsystem, float dt, float gametim
 		// DOTO:: get the player index
 
 
-		DRData drdata{ htonl(accel.x), htonl(accel.y), htonl(gametime), htonl(_playerID) };
-		_InsertNotification(GameCommands::MoveForward,
+		//DRData drdata{ htonl(accel.x), htonl(accel.y), htonl(gametime), htonl(_playerID) };
+		/*_InsertNotification(GameCommands::MoveForward,
 			{ {(char*)&drdata, sizeof(DRData)} },
-			-1);
+			-1);*/
 		// broadcast this acceleration to all other client
 
 		// end broadcast
@@ -142,27 +142,27 @@ void LogicSystem::PullEvent(float currgametime, Factory* factory)
 		if (command == GameCommands::MoveForward)
 		{
 			// get the player index
-			DRData drdata;
+		/*	DRData drdata;
 			memcpy(&drdata, &(event.second[0]), sizeof(DRData));
 			drdata.accelx = ntohl(drdata.accelx);
 			drdata.accely = ntohl(drdata.accely);
 			drdata.gametime = ntohl(drdata.gametime);
 			drdata.playerindex = ntohl(drdata.playerindex);
 
-			PerformDR(factory->getPlayer(clientAddrIndex), drdata, currgametime);
+			PerformDR(factory->getPlayer(clientAddrIndex), drdata, currgametime);*/
 
 		}
 
 		else if (command == GameCommands::MoveBackward)
 		{
-			DRData drdata;
+			/*DRData drdata;
 			memcpy(&drdata, &(event.second[0]), sizeof(DRData));
 			drdata.accelx = ntohl(drdata.accelx);
 			drdata.accely = ntohl(drdata.accely);
 			drdata.gametime = ntohl(drdata.gametime);
 			drdata.playerindex = ntohl(drdata.playerindex);
 
-			PerformDR(factory->getPlayer(clientAddrIndex), drdata, currgametime);
+			PerformDR(factory->getPlayer(clientAddrIndex), drdata, currgametime);*/
 		}
 
 		else if (command == GameCommands::RotateLeft)
