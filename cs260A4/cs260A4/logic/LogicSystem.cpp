@@ -52,15 +52,15 @@ void LogicSystem::Update(const InputSystem& inputsystem, float dt, float gametim
 		std::string drdatastring;
 
 		// size of 
-		
+
 		//DRData drdata{ (float)htonl(accel.x), (float)htonl(accel.y), htonl(gametime), htonl(_playerID) };
-		
-		
+
+
 	/*	_InsertNotification(GameCommands::MoveForward,
 			{ {(char*)&drdata, sizeof(DRData)} },
 			-1);*/
 
-		// end broadcast
+			// end broadcast
 		ownship.rigidbody.velocity = ownship.rigidbody.velocity + accel;
 
 		// (from CS230) scale velocity by 0.99 to simulate drag and prevent velocity out of control
@@ -81,9 +81,9 @@ void LogicSystem::Update(const InputSystem& inputsystem, float dt, float gametim
 		/*_InsertNotification(GameCommands::MoveForward,
 			{ {(char*)&drdata, sizeof(DRData)} },
 			-1);*/
-		// broadcast this acceleration to all other client
+			// broadcast this acceleration to all other client
 
-		// end broadcast
+			// end broadcast
 
 		ownship.rigidbody.velocity = ownship.rigidbody.velocity + accel;
 
@@ -125,8 +125,63 @@ void LogicSystem::Update(const InputSystem& inputsystem, float dt, float gametim
 	}
 }
 
-void LogicSystem::TestUpdate(const InputSystem& inputsystem, float dt, std::vector<GameObject> &gameobjlist)
+void LogicSystem::TestUpdate(const InputSystem& inputsystem, float dt, std::vector<GameObject>& gameobjlist)
 {
+
+	for (auto& gameobj : gameobjlist)
+	{
+		if (gameobj.playerIndex == 0)
+		{
+			if (inputsystem.KeyHold(VK_W))
+			{
+				Vector2 accel{ cosf(gameobj.transform.rotation) * acceleration_speed * dt,
+									 sinf(gameobj.transform.rotation) * acceleration_speed * dt };
+
+				gameobj.rigidbody.velocity = gameobj.rigidbody.velocity + accel;
+
+				// (from CS230) scale velocity by 0.99 to simulate drag and prevent velocity out of control
+				gameobj.rigidbody.velocity = gameobj.rigidbody.velocity * 0.99f;
+
+			}
+
+			if (inputsystem.KeyHold(VK_S))
+			{
+				Vector2 accel{ cosf(gameobj.transform.rotation) * -acceleration_speed * dt,
+									 sinf(gameobj.transform.rotation) * -acceleration_speed * dt };
+
+				gameobj.rigidbody.velocity = gameobj.rigidbody.velocity + accel;
+
+				// (from CS230) scale velocity by 0.99 to simulate drag and prevent velocity out of control
+				gameobj.rigidbody.velocity = gameobj.rigidbody.velocity * 0.99f;
+
+			}
+
+			if (inputsystem.KeyHold(VK_A))
+			{
+				gameobj.transform.rotation += rotation_speed * dt;
+				gameobj.transform.rotation = Wrap(gameobj.transform.rotation, -PI, PI);
+			}
+
+			if (inputsystem.KeyHold(VK_D))
+			{
+				gameobj.transform.rotation -= rotation_speed * dt;
+				gameobj.transform.rotation = Wrap(gameobj.transform.rotation, -PI, PI);
+			}
+
+			if (inputsystem.KeyPressed(VK_SPACEBAR))
+			{
+				float bulletspeed = 200.0f;
+				GameObject bullet;
+				bullet.transform.position = gameobj.transform.position;
+				bullet.transform.rotation = gameobj.transform.rotation;
+				bullet.transform.scale = { 15.0f, 3.0f };
+				bullet.obj_type = TYPE_BULLET;
+				bullet.rigidbody.velocity = { cosf(gameobj.transform.rotation) * bulletspeed, sinf(gameobj.transform.rotation) * bulletspeed };
+				gameobjlist.push_back(bullet);
+			}
+		}
+	}
+
 
 }
 
@@ -151,7 +206,7 @@ void LogicSystem::PullEvent(float currgametime, Factory* factory)
 			{
 				int gameObjectID = 0;
 				Extract_Number_MessageList(i + 1, messageList, gameObjectID);
-				
+
 				GameObject object;
 				ExtractGameObject_MessageList(i + 2, messageList, object);
 				factory->insertGameObject(gameObjectID, object);
@@ -274,7 +329,7 @@ void LogicSystem::PerformDR(GameObject& ship, const DRData& drdata, float currga
 
 	// extrapolate the position base on time difference
 	ship.transform.position = ship.transform.position + ship.rigidbody.velocity * timediff;
-	
+
 	// CS230 stimulate drag 
 	ship.rigidbody.velocity = ship.rigidbody.velocity * 0.99f;
 

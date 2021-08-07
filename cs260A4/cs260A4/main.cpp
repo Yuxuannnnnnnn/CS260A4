@@ -16,7 +16,8 @@
 #define WINDOW_WIDTH  800
 #define WINDOW_HEIGHT 600
 
-
+#include <stdlib.h>     /* srand, rand */
+#include <time.h>       /* time */
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	_In_opt_ HINSTANCE hPrevInstance,
@@ -26,9 +27,17 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	//constructor open up console
 	Console console;
 
-	// test graphics code, delete later
+	/* 
+	    TEST BEGIN
+		*************************
+		KEY : W A S D SPACE
 
-	Transforms trans{ {-50,0},0,{15,20} };
+
+		test graphics code, delete later
+		
+		REMOVE THE LINE BELOW (LINE 36) TO COMMENT OUT
+	*/         
+	Transforms trans{ {-50,0},0,{25,15} };
 
 	std::vector<GameObject> objlist;
 	objlist.push_back(GameObject{ trans, Rigidbody{}, TYPE_PLAYER, triangle, 0 });
@@ -45,11 +54,22 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	objlist.push_back(GameObject{ trans, Rigidbody{}, TYPE_PLAYER, triangle, 3 });
 
-	trans.position = { 100,100 };
-	trans.scale = { 50,50 };
+	trans.rotation = 0;
+	for (int i = 0; i < 4; ++i)
+	{
+		srand(time(NULL));
 
-	Rigidbody rb{ Vector2{ 10,10} };
-	objlist.push_back(GameObject{ trans, rb, TYPE_ASTEROID });
+		trans.position = { rand() % (50 + i) + 50.0f,  rand() % (50 - i) + 50.0f };
+
+		float scal = rand() % 50 + 30;
+		trans.scale = { scal,scal };
+		Rigidbody rb{ Vector2{ 35,30} };
+		if (i % 2 == 0)
+			rb.velocity.x = -35;
+
+		objlist.push_back(GameObject{ trans, rb, TYPE_ASTEROID });
+	}
+
 
 	std::unique_ptr<TestGame> testgame =
 		std::make_unique<TestGame>
@@ -62,9 +82,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	return 0;
 
-	// end test
-
-
+	/* 
+			TEST END
+		*******************************************
+	*/
 	//parse the comandline arguments
 	CommandLine_Parser cmdParser;
 	bool check = cmdParser.Parse();

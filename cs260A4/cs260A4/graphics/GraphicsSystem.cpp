@@ -23,14 +23,14 @@ void GraphicsSystem::RenderGameObject(GameObject& gameobj)
 	model = glm::translate(model, glm::vec3(gameobj.transform.position.x, gameobj.transform.position.y, 1));
 	model = glm::rotate(model, gameobj.transform.rotation, glm::vec3(0.0f, 0.0f, 1));
 	model = glm::scale(model, glm::vec3(gameobj.transform.scale.x, gameobj.transform.scale.y, 1));
-	
+
 	glm::mat4 mvp = proj * view * model;
 	_shader.use();
 	_shader.setMat4("u_MVP", mvp);
 	// triangle mesh
 	if (gameobj.obj_type == TYPE_PLAYER)
 	{
-	
+
 		switch (gameobj.playerIndex)
 		{
 		case 0:
@@ -54,8 +54,11 @@ void GraphicsSystem::RenderGameObject(GameObject& gameobj)
 	{
 		glBindVertexArray(_vaoquad);
 
-		_shader.setVec3("u_Color", 0.5, 0.1, 1);
-
+		// set color base on bullet, asteriod 
+		if (gameobj.obj_type == TYPE_ASTEROID)
+			_shader.setVec3("u_Color", 0.5, 0.1, 1);
+		if (gameobj.obj_type == TYPE_BULLET)
+			_shader.setVec3("u_Color", 0.5, 0.3, 0.05);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 	}
 
@@ -105,8 +108,8 @@ void GraphicsSystem::Init(HWND hwnd)
 
 	float vertices[] = {
 	-0.5f, -0.5f, 0.0f,
-	 0.5f, -0.5f, 0.0f,
-	 0.0f,  0.5f, 0.0f
+	 0.5f, 0.0f, 0.0f,
+	 -0.5f,  0.5f, 0.0f
 	};
 
 	_shader.Init("Default.vs", "Default.fs");
@@ -204,6 +207,8 @@ void GraphicsSystem::Update(std::vector<GameObject>& gameobjlist)
 
 	for (auto& gameobj : gameobjlist)
 	{
+		if (gameobj.isActive == false)
+			continue;
 		RenderGameObject(gameobj);
 	}
 

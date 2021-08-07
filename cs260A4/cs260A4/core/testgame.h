@@ -40,6 +40,8 @@ public:
 
 			//_physicSystem.Update();						//update physics
 
+			_physicSystem.TestUpdate(_objlist, dt);
+
 			_graphicsSystem.Update(_objlist);					//update graphics
 			_graphicsSystem.LateUpdate();				//update graphics - swap buffer
 
