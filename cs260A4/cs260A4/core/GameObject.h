@@ -25,6 +25,18 @@ enum MeshType
 
 struct GameObject
 {
+	GameObject() = default;
+
+	GameObject(const Transforms& trans, const Rigidbody& rb, TYPE objtype, MeshType meshtype = quad, int playerindex = -1)
+	{
+		transform = trans;
+		rigidbody = rb;
+		obj_type = objtype;
+		mesh = meshtype;
+		playerIndex = playerindex;
+		
+	}
+
 	Transforms transform; //will use this for graphics
 	Rigidbody rigidbody;
 	AABBCollider aabb;  //all asteroids will be the same size collider
@@ -35,4 +47,8 @@ struct GameObject
 	
 	TYPE obj_type;
 	int playerIndex{ -1 };
+
+	// test code, remove later
+
+	bool isActive = true;
 };

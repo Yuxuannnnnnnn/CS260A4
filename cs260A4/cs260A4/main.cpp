@@ -9,6 +9,8 @@
 
 #include "core/testgame.h"
 #include "core/GameObject.h"
+#include "physics/Transform.h"
+#include "physics/Rigidbody.h"
 #include <vector>
 
 #define WINDOW_WIDTH  800
@@ -24,7 +26,30 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	//constructor open up console
 	Console console;
 
+	// test graphics code, delete later
+
+	Transforms trans{ {-50,0},0,{15,20} };
+
 	std::vector<GameObject> objlist;
+	objlist.push_back(GameObject{ trans, Rigidbody{}, TYPE_PLAYER, triangle, 0 });
+
+	trans.position.x = -20;
+
+	objlist.push_back(GameObject{ trans, Rigidbody{}, TYPE_PLAYER, triangle, 1 });
+
+	trans.position.x = 10;
+
+	objlist.push_back(GameObject{ trans, Rigidbody{}, TYPE_PLAYER, triangle, 2 });
+
+	trans.position.x = 40;
+
+	objlist.push_back(GameObject{ trans, Rigidbody{}, TYPE_PLAYER, triangle, 3 });
+
+	trans.position = { 100,100 };
+	trans.scale = { 50,50 };
+
+	Rigidbody rb{ Vector2{ 10,10} };
+	objlist.push_back(GameObject{ trans, rb, TYPE_ASTEROID });
 
 	std::unique_ptr<TestGame> testgame =
 		std::make_unique<TestGame>
@@ -37,6 +62,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	return 0;
 
+	// end test
 
 
 	//parse the comandline arguments

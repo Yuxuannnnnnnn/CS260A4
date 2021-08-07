@@ -15,6 +15,50 @@
 
 void GraphicsSystem::RenderGameObject(GameObject& gameobj)
 {
+	_shader.use();
+
+	glm::mat4 model = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
+	glm::mat4 view = glm::mat4(1.0f);
+
+	model = glm::translate(model, glm::vec3(gameobj.transform.position.x, gameobj.transform.position.y, 1));
+	model = glm::rotate(model, gameobj.transform.rotation, glm::vec3(0.0f, 0.0f, 1));
+	model = glm::scale(model, glm::vec3(gameobj.transform.scale.x, gameobj.transform.scale.y, 1));
+	
+	glm::mat4 mvp = proj * view * model;
+	_shader.use();
+	_shader.setMat4("u_MVP", mvp);
+	// triangle mesh
+	if (gameobj.obj_type == TYPE_PLAYER)
+	{
+	
+		switch (gameobj.playerIndex)
+		{
+		case 0:
+			_shader.setVec3("u_Color", 1, 0, 0);
+			break;
+		case 1:
+			_shader.setVec3("u_Color", 0, 1, 0);
+			break;
+		case 2:
+			_shader.setVec3("u_Color", 0, 0, 1);
+			break;
+		case 3:
+			_shader.setVec3("u_Color", 1, 1, 0);
+			break;
+		}
+		glBindVertexArray(_vaotri);
+		glDrawArrays(GL_TRIANGLES, 0, 3);
+	}
+	// quad mesh
+	else
+	{
+		glBindVertexArray(_vaoquad);
+
+		_shader.setVec3("u_Color", 0.5, 0.1, 1);
+
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+	}
+
 }
 
 void GraphicsSystem::Init(HWND hwnd)
@@ -105,50 +149,58 @@ void GraphicsSystem::Update(std::vector<GameObject>& gameobjlist)
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	_shader.use();
-	
-	// draw triangle mesh
-
-	glm::mat4 model = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
-	glm::mat4 view = glm::mat4(1.0f);
-	
-	model = glm::translate(model, glm::vec3(-200, 10, 1));
-	model = glm::rotate(model, 0.0f, glm::vec3(0.0f, 0.0f, 1));
-	model = glm::scale(model, glm::vec3(100, 100, 1));
-	
-	glm::mat4 mvp =  proj * model;
-	
-
-	_shader.setMat4("u_MVP", mvp);
-	_shader.setVec3("u_Color", 1,0,0);
-
-	glBindVertexArray(_vaotri);
+	//_shader.use();
+	//
 
 
 
-	glDrawArrays(GL_TRIANGLES, 0, 3);
+	//// draw triangle mesh
 
 
 
-	// draw quad mesh
 
-	glBindVertexArray(_vaoquad);
+	//glm::mat4 model = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
+	//glm::mat4 view = glm::mat4(1.0f);
+	//
+	//model = glm::translate(model, glm::vec3(-200, 10, 1));
+	//model = glm::rotate(model, 0.0f, glm::vec3(0.0f, 0.0f, 1));
+	//model = glm::scale(model, glm::vec3(100, 100, 1));
+	//
+	//glm::mat4 mvp =  proj * model;
+	//
+
+	//_shader.setMat4("u_MVP", mvp);
+	//_shader.setVec3("u_Color", 1,0,0);
+
+	//glBindVertexArray(_vaotri);
 
 
-	model = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
-	view = glm::mat4(1.0f);
 
-	model = glm::translate(model, glm::vec3(100, 10, 1));
-	model = glm::rotate(model, 0.0f, glm::vec3(0.0f, 0.0f, 1));
-	model = glm::scale(model, glm::vec3(100, 100, 1));
+	//glDrawArrays(GL_TRIANGLES, 0, 3);
 
-	 mvp = proj * model;
 
-	_shader.use();
-	_shader.setMat4("u_MVP", mvp);
-	_shader.setVec3("u_Color", 0, 1, 0);
 
-	glDrawArrays(GL_TRIANGLES, 0, 6);
+	//// draw quad mesh
+
+	//glBindVertexArray(_vaoquad);
+
+
+	//model = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
+	//view = glm::mat4(1.0f);
+
+	//model = glm::translate(model, glm::vec3(100, 10, 1));
+	//model = glm::rotate(model, 0.0f, glm::vec3(0.0f, 0.0f, 1));
+	//model = glm::scale(model, glm::vec3(100, 100, 1));
+
+	// mvp = proj * model;
+
+	//_shader.use();
+	//_shader.setMat4("u_MVP", mvp);
+	//_shader.setVec3("u_Color", 0, 1, 0);
+
+	//glDrawArrays(GL_TRIANGLES, 0, 6);
+
+
 
 	for (auto& gameobj : gameobjlist)
 	{
