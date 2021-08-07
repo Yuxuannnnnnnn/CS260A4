@@ -1,16 +1,21 @@
 #include "GraphicsSystem.h"
-#include "../Dep/glew/GL/glew.h"
+//#include "../Dep/glew/GL/glew.h"
 #include "OpenGLErrorCheck.h"
 
 #include "Mesh.h"
 #include "Shader.h"
 
 //#include "Graphics3d.h"
-#include "Camera.h"
+//#include "Camera.h"
 //#include "Input/KeyboardInput.h"
 
+#include "../Dep/glm/glm.hpp"
+#include "../Dep/glm/gtc/matrix_transform.hpp"
+#include "../Dep/glm/gtc/type_ptr.hpp"
 
-
+void GraphicsSystem::RenderGameObject(GameObject& gameobj)
+{
+}
 
 void GraphicsSystem::Init(HWND hwnd)
 {
@@ -34,30 +39,128 @@ void GraphicsSystem::Init(HWND hwnd)
 		std::cerr << "OpenGL version: " << glGetString(GL_VERSION) << std::endl;
 	}
 
-	Mesh::Init();
+	//Mesh::Init();
 
 	//load in the default screen shader
-	Shader::screenShader = new Shader("Asset/Shaders/DefaultScreen");
+	/*Shader::screenShader = new Shader("Asset/Shaders/DefaultScreen");
 
-	Shader::defaultShader = new Shader("Asset/Shaders/Default.vs", "Asset/Shaders/Default.fs");
-	Graphics::Camera::camera = new Graphics::Camera;
+	Shader::defaultShader = new Shader("Asset/Shaders/Default.vs", "Asset/Shaders/Default.fs");*/
+	//Graphics::Camera::camera = new Graphics::Camera;
 	//Input::KeyboardInput::inst = new Input::KeyboardInput;
-}
-
-void GraphicsSystem::Update()
-{
-	glEnable(GL_DEPTH_TEST);
-	//update opengl
-
-	glClearColor(0.5f, 0, 0, 1); //RGBA
-
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 
 	RECT rect;
 	GetClientRect(_hwnd, &rect);
 	glViewport(static_cast<GLint>(0), static_cast<GLint>(0), rect.right - rect.left, rect.bottom - rect.top);
 
+	proj = glm::ortho(-400.0f, 400.0f, -300.0f, 300.0f, -10.0f, 10.0f);
+
+	glGenVertexArrays(1, &_vaotri);
+	glBindVertexArray(_vaotri);
+
+	glGenBuffers(1, &_vbotri);
+
+	float vertices[] = {
+	-0.5f, -0.5f, 0.0f,
+	 0.5f, -0.5f, 0.0f,
+	 0.0f,  0.5f, 0.0f
+	};
+
+	_shader.Init("Default.vs", "Default.fs");
+	glBindBuffer(GL_ARRAY_BUFFER, _vbotri);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	// 3. then set our vertex attributes pointers
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+
+
+	glGenVertexArrays(1, &_vaoquad);
+	glBindVertexArray(_vaoquad);
+
+	glGenBuffers(1, &_vboquad);
+
+	float vertices2[] = {
+	 0.5f,  0.5f, 0.0f,  // top right
+	 0.5f, -0.5f, 0.0f,  // bottom right
+	-0.5f,  0.5f, 0.0f,  // top left 
+	// second triangle
+	 0.5f, -0.5f, 0.0f,  // bottom right
+	-0.5f, -0.5f, 0.0f,  // bottom left
+	-0.5f,  0.5f, 0.0f   // top left
+	};
+
+	glBindBuffer(GL_ARRAY_BUFFER, _vboquad);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices2), vertices2, GL_STATIC_DRAW);
+	// 3. then set our vertex attributes pointers
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+	// glEnable(GL_DEPTH_TEST);
+}
+
+void GraphicsSystem::Update(std::vector<GameObject>& gameobjlist)
+{
+
+	//update opengl
+
+	glClearColor(0, 0, 0, 1); //RGBA
+
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	_shader.use();
+	
+	// draw triangle mesh
+
+	glm::mat4 model = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
+	glm::mat4 view = glm::mat4(1.0f);
+	
+	model = glm::translate(model, glm::vec3(-200, 10, 1));
+	model = glm::rotate(model, 0.0f, glm::vec3(0.0f, 0.0f, 1));
+	model = glm::scale(model, glm::vec3(100, 100, 1));
+	
+	glm::mat4 mvp =  proj * model;
+	
+
+	_shader.setMat4("u_MVP", mvp);
+	_shader.setVec3("u_Color", 1,0,0);
+
+	glBindVertexArray(_vaotri);
+
+
+
+	glDrawArrays(GL_TRIANGLES, 0, 3);
+
+
+
+	// draw quad mesh
+
+	glBindVertexArray(_vaoquad);
+
+
+	model = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
+	view = glm::mat4(1.0f);
+
+	model = glm::translate(model, glm::vec3(100, 10, 1));
+	model = glm::rotate(model, 0.0f, glm::vec3(0.0f, 0.0f, 1));
+	model = glm::scale(model, glm::vec3(100, 100, 1));
+
+	 mvp = proj * model;
+
+	_shader.use();
+	_shader.setMat4("u_MVP", mvp);
+	_shader.setVec3("u_Color", 0, 1, 0);
+
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+
+	for (auto& gameobj : gameobjlist)
+	{
+		RenderGameObject(gameobj);
+	}
+
+
+
+}
+
+void GraphicsSystem::Update()
+{
 	// input
 	//Input::KeyboardInput::inst->Update();
 	//if (Input::KeyboardInput::inst->IsKeyTriggered(VK_1))
@@ -91,56 +194,56 @@ void GraphicsSystem::Update()
 	//if (Input::KeyboardInput::inst->IsKeyPressed(VK_O))
 	//  objTransform.position.z += .001953125f;
 
-	static Vector3 euler1 = Vector3();
-	static Vector3 euler2 = Vector3();
+	//static Vector3 euler1 = Vector3();
+	//static Vector3 euler2 = Vector3();
 
-	//if (Input::KeyboardInput::inst->IsKeyPressed(VK_7))
-	//  euler1.y += -0.125f;
-	//if (Input::KeyboardInput::inst->IsKeyPressed(VK_8))
-	//  euler1.y += 0.125f;
-	//if (Input::KeyboardInput::inst->IsKeyPressed(VK_9))
-	//  euler2.y += -0.125f;
-	//if (Input::KeyboardInput::inst->IsKeyPressed(VK_0))
-	//  euler2.y += 0.125f;
+	////if (Input::KeyboardInput::inst->IsKeyPressed(VK_7))
+	////  euler1.y += -0.125f;
+	////if (Input::KeyboardInput::inst->IsKeyPressed(VK_8))
+	////  euler1.y += 0.125f;
+	////if (Input::KeyboardInput::inst->IsKeyPressed(VK_9))
+	////  euler2.y += -0.125f;
+	////if (Input::KeyboardInput::inst->IsKeyPressed(VK_0))
+	////  euler2.y += 0.125f;
+	////
+	//camTransform.rotation = Quaternion::EulerAnglesToQuaternion(euler1);
+	//objTransform.rotation = Quaternion::EulerAnglesToQuaternion(euler2);
+	////
+	////if (Input::KeyboardInput::inst->IsKeyPressed(VK_3))
+	////  camTransform.rotation = Quaternion::Identity();
+	////if (Input::KeyboardInput::inst->IsKeyPressed(VK_4))
+	////  objTransform.rotation = Quaternion::Identity();
+
+	//euler1 = Quaternion::QuaternionToEulerAngles(camTransform.rotation);
+	//euler2 = Quaternion::QuaternionToEulerAngles(objTransform.rotation);
+
+	//// test mesh draw
+	//Graphics::Camera::camera->Begin();
 	//
-	camTransform.rotation = Quaternion::EulerAnglesToQuaternion(euler1);
-	objTransform.rotation = Quaternion::EulerAnglesToQuaternion(euler2);
+	//Matrix4x4 proj = Graphics::Camera::camera->GetProjectionMatrix();
+	//Matrix4x4 view = Graphics::Camera::camera->GetViewMatrix(camTransform);
+	//Matrix4x4 model = objTransform.LocalToWorldMatrix();
 	//
-	//if (Input::KeyboardInput::inst->IsKeyPressed(VK_3))
-	//  camTransform.rotation = Quaternion::Identity();
-	//if (Input::KeyboardInput::inst->IsKeyPressed(VK_4))
-	//  objTransform.rotation = Quaternion::Identity();
+	///*Shader::defaultShader->SetUniformMatrix4f("_M", model);
+	//Shader::defaultShader->SetUniformMatrix4f("_V", view);
+	//Shader::defaultShader->SetUniformMatrix4f("_P", proj);
+	//Shader::defaultShader->SetUniformVector3f("lightPos", camTransform.position);
+	//Shader::defaultShader->SetUniformVector3f("lightPos", camTransform.position);
+	//Shader::defaultShader->SetUniformVector3f("lightPos", camTransform.position);
+	//Shader::defaultShader->SetUniformVector3f("camPos", camTransform.position);
+	//Mesh::DrawCube(-50.0);
 
-	euler1 = Quaternion::QuaternionToEulerAngles(camTransform.rotation);
-	euler2 = Quaternion::QuaternionToEulerAngles(objTransform.rotation);
+	//model = objTransform2.LocalToWorldMatrix();
+	//Shader::defaultShader->SetUniformMatrix4f("_M", model);
+	//Mesh::DrawCube({ -50.0 });
 
-	// test mesh draw
-	Graphics::Camera::camera->Begin();
-	
-	Matrix4x4 proj = Graphics::Camera::camera->GetProjectionMatrix();
-	Matrix4x4 view = Graphics::Camera::camera->GetViewMatrix(camTransform);
-	Matrix4x4 model = objTransform.LocalToWorldMatrix();
-	
-	Shader::defaultShader->SetUniformMatrix4f("_M", model);
-	Shader::defaultShader->SetUniformMatrix4f("_V", view);
-	Shader::defaultShader->SetUniformMatrix4f("_P", proj);
-	Shader::defaultShader->SetUniformVector3f("lightPos", camTransform.position);
-	Shader::defaultShader->SetUniformVector3f("lightPos", camTransform.position);
-	Shader::defaultShader->SetUniformVector3f("lightPos", camTransform.position);
-	Shader::defaultShader->SetUniformVector3f("camPos", camTransform.position);
-	Mesh::DrawCube(-50.0);
+	//Graphics::Camera::camera->End();
 
-	model = objTransform2.LocalToWorldMatrix();
-	Shader::defaultShader->SetUniformMatrix4f("_M", model);
-	Mesh::DrawCube({ -50.0 });
-
-	Graphics::Camera::camera->End();
-
-	Graphics::Camera::camera->GetFrameBuffer().BindColorAsTexture();
-	Shader::screenShader->SetUniform1i("_MainTex", 0);
-	Shader::screenShader->SetUniformVector2f("_ScreenAspect", Vector2(1, 1));
-	Mesh::DrawQuad({ -50.0, -50.0 });
-	FrameBuffer::UnbindTexture();
+	//Graphics::Camera::camera->GetFrameBuffer().BindColorAsTexture();
+	//Shader::screenShader->SetUniform1i("_MainTex", 0);
+	//Shader::screenShader->SetUniformVector2f("_ScreenAspect", Vector2(1, 1));*/
+	//Mesh::DrawQuad({ -50.0, -50.0 });
+	//FrameBuffer::UnbindTexture();
 }
 
 void GraphicsSystem::LateUpdate()
@@ -151,10 +254,10 @@ void GraphicsSystem::LateUpdate()
 void GraphicsSystem::Exit()
 {
 	//delete Input::KeyboardInput::inst;
-	delete Graphics::Camera::camera;
+	/*delete Graphics::Camera::camera;
 	delete Shader::defaultShader;
-	delete Shader::screenShader;
-	Mesh::Exit();
+	delete Shader::screenShader;*/
+	//Mesh::Exit();
 
 	std::cerr << "Shutting down OpenGL..." << std::endl;
 	CleanRenderingEnvironment();

@@ -125,6 +125,11 @@ void LogicSystem::Update(const InputSystem& inputsystem, float dt, float gametim
 	}
 }
 
+void LogicSystem::TestUpdate(const InputSystem& inputsystem, float dt, std::vector<GameObject> &gameobjlist)
+{
+
+}
+
 void LogicSystem::PullEvent(float currgametime, Factory* factory)
 {
 

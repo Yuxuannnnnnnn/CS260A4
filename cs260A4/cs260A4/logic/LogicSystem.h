@@ -408,6 +408,9 @@ public:
 	//should lock the mutex before entering the loop
 	void Update(const InputSystem& inputsystem, float dt, float gametime, Factory*);
 
+	// testupdate
+	void TestUpdate(const InputSystem& inputsystem, float dt, std::vector<GameObject>& gameobjlist);
+
 //----------------------Functions For NetworkSystem to use------------------------------------
 
 	//a function for the NetworkSystem to use

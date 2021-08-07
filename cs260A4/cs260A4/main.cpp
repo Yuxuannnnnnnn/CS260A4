@@ -7,6 +7,9 @@
 //Wrapper to parse the commandline from the console
 #include "Tools/Console.h"
 
+#include "core/testgame.h"
+#include "core/GameObject.h"
+#include <vector>
 
 #define WINDOW_WIDTH  800
 #define WINDOW_HEIGHT 600
@@ -21,6 +24,21 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	//constructor open up console
 	Console console;
 
+	std::vector<GameObject> objlist;
+
+	std::unique_ptr<TestGame> testgame =
+		std::make_unique<TestGame>
+		(hInstance, nCmdShow,
+			WINDOW_WIDTH, WINDOW_HEIGHT, objlist);
+
+
+	testgame->Run();
+
+
+	return 0;
+
+
+
 	//parse the comandline arguments
 	CommandLine_Parser cmdParser;
 	bool check = cmdParser.Parse();
@@ -28,10 +46,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		return 1;
 
 	//create a game
-	std::unique_ptr<Game> game = 
+	std::unique_ptr<Game> game =
 		std::make_unique<Game>
-		(hInstance, nCmdShow, 
-			WINDOW_WIDTH, WINDOW_HEIGHT, 
+		(hInstance, nCmdShow,
+			WINDOW_WIDTH, WINDOW_HEIGHT,
 			cmdParser.Get_HostName_Port_List());
 
 	//run the game

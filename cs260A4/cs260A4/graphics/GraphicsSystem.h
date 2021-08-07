@@ -1,7 +1,10 @@
 #pragma once
 #include "../framework.h"
 #include "../Math/Transform.h"
-
+#include "../core/GameObject.h"
+#include <vector>
+#include "Shader.h"
+#include <gl/glew.h>
 
 class GraphicsSystem
 {
@@ -11,10 +14,22 @@ class GraphicsSystem
 	HWND _hwnd; //reference to the handle to the window
 
 
+
 	Transform objTransform{};
 	Transform objTransform2{ Vector3(0, -1, 0) };
 	Transform camTransform{ Vector3(0, 0, -10) };
 	Transform lightTransform{ Vector3(-10, 0, 0) };
+
+	void RenderGameObject(GameObject& gameobj);
+
+	Shader _shader;
+	GLuint _vaotri;
+	GLuint _vaoquad;
+	GLuint _vbotri;
+	GLuint _vboquad;
+
+	glm::mat4 proj;
+	
 
 public:
 	GraphicsSystem()
@@ -22,6 +37,7 @@ public:
 	}
 
 	void Init(HWND hwnd);
+	void Update(std::vector<GameObject>& gameobjlist);
 	void Update();
 	void LateUpdate();
 	void Exit();
