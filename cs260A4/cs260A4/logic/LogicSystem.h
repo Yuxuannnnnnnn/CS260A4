@@ -5,8 +5,11 @@
 #include <vector>
 #include <mutex>
 #include <functional>
+#include <string>
 #include "DRData.h"
 #include "../core/GameObject.h"
+
+#include <typeinfo> //For typeid() function
 
 //for gameObjects creation 
 //store factory pointer in LogicSystem
@@ -247,23 +250,86 @@ public:
 		//and the initial settings of all the player ships
 		if (_isHost)
 		{
-			auto ObjectList = 
+			MessageList messageList;
+
+			auto ShipList = 
 				gameFactory->Create_playerShips_DataInitialisation(
 				_NumOfPlayersRequired,
 				_playerID);
 
-			//players need to know the gameObjectID of each gameObject
-			//players need to know the playerID of each ship
-			//players need to know the details of each gameObjects
+			auto AsteroidsList = 
+				gameFactory->Create_Asteroids_DataInitialisation();
 
-			for (auto& object : ObjectList)
+
+			for (auto& object : ShipList)
 			{
+				//players need to know the gameObjectID of each gameObject
+				//push gameObjectID
+				messageList.push_back({ std::to_string(object.second).c_str(), 
+										std::to_string(object.second).size() + sizeof("\0")});
+
+				//players need to know the details of each gameObjects
+				GameObject& obj = gameFactory->getGameObject(object.second);
+
 
 			}
 
 
+			for (auto& object : AsteroidsList)
+			{
+
+			}
+
 		}
 	}
+
+	//function to convert an integer/float to a string and then to a Message
+	//Insert the Mesage to the messageList
+	template<typename type>
+	void Insert_Number_MessageList(MessageList& messageList, const type& number)
+	{
+		messageList.push_back({ std::to_string(number).c_str(),
+		std::to_string(number).size() + sizeof("\0") });
+	}
+
+	//function to convert a Vec2 to a string and then to a Message
+	//Insert the Mesage to the messageList
+	void Insert_Vec2(MessageList& messageList, Vector2& vec)
+	{
+		Insert_Number_MessageList(messageList, vec.x);
+		Insert_Number_MessageList(messageList, vec.y);
+	}
+
+	//function to extract an integer or float from the messageList
+	template<typename type>
+	void Extract_Number_MessageList(int index, MessageList& messageList, type& number)
+	{
+		Message mess = messageList[index];
+		char buffer[100] = "\0";
+		memcpy(&buffer, mess.message, mess.size_);
+
+		std::string NumberString = buffer;
+
+		if (typeid(type) == typeid(int))
+		{
+			number = stoi(NumberString);
+		}
+		else if (typeid(type) == typeid(float))
+		{
+			number = stof(NumberString);
+		}
+	}
+
+	//function to extract an vec2 from the messageList
+	void Extract_Vec2_MessageList(int index, MessageList& messageList, Vector2& vec)
+	{
+		Extract_Number_MessageList(index, messageList, vec.x);
+		Extract_Number_MessageList(index, messageList, vec.y);
+	}
+
+
+	
+
 
 //--------------------------------In the GameLoop------------------------------------
 

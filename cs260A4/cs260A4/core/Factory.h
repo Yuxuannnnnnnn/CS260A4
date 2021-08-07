@@ -4,6 +4,7 @@
 #include <vector>
 #include <array>
 #include <unordered_map>
+#include <time.h>
 
 
 #ifndef FACTORY
@@ -26,12 +27,14 @@ public:
 	std::vector<gameObjectID> DeletionList;
 
 
+	typedef int playerID;
+
 	//store this player gameObjectID
 	gameObjectID _playerObjectID;
+	playerID _playerID;
 
 
 	//map the playersID to the gameObjectID
-	typedef int playerID;
 	std::unordered_map<playerID, gameObjectID> playerObjectsList;
 
 
@@ -47,6 +50,8 @@ public:
 		int numberOfPlayers, 
 		playerID playerID)
 	{
+		_playerID = playerID;
+		
 		//create own ship - blue color
 		_playerObjectID = CreateShip(playerID, { 0.f, 0.f, 1.f });
 
@@ -90,11 +95,24 @@ public:
 	}
 
 
+	std::vector<gameObjectID> Create_Asteroids_DataInitialisation()
+	{
+		srand(time(NULL));
+		int numberOfAsteroids = (rand() % 50) + 20;
+
+		std::vector <gameObjectID> objectlist;
+		for (size_t i = 0; i < numberOfAsteroids; i++)
+		{
+			objectlist.push_back(CreateAsteroid());
+		}
+	}
+
+
 	//Every client will spawn asteroid
 	// They will broadcast to everyone the asteroid positions & velocity
 	// 
 	//All other clients will insert the list of gameObjects
-	gameObjectID Asteroids_DataInitialisation()
+	gameObjectID CreateAsteroid()
 	{
 		//random velocity will be 5 to 20
 		//color will be purple for every asteriod, (1, 0, 1)
@@ -105,13 +123,17 @@ public:
 		gameObjects[counterID].transform.scale = { 20.f, 20.f };
 		gameObjects[counterID].transform.rotation = 0.f;
 
-		gameObjects[counterID].mesh = MeshType::triangle;
-		//gameObjects[counterID].color = color;
+		srand(time(NULL));
+		gameObjects[counterID].rigidbody.velocity = { (float)(rand() % 15) + 5.0f, (float)(rand() % 15) + 5.0f };
+
+		gameObjects[counterID].mesh = MeshType::quad;
+		gameObjects[counterID].color = {1.f, 0.f, 1.f};
 
 		gameObjects[counterID].obj_type = TYPE::TYPE_ASTEROID;
-		//gameObjects[counterID].playerIndex = playerID;
+		gameObjects[counterID].playerIndex = _playerID;
 		counterID++;
 
+		return counterID - 1;
 	}
 
 
@@ -135,6 +157,11 @@ public:
 	GameObject& getPlayer(playerID ID)
 	{
 		return gameObjects[playerObjectsList[ID]];
+	}
+
+	GameObject& getGameObject(gameObjectID id)
+	{
+		return gameObjects[id];
 	}
 
 //--------------------Update function Per Loop---------------------------

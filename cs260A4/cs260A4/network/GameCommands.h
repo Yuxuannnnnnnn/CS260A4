@@ -15,6 +15,7 @@ enum class GameCommands
 	//Host will broadcast to all players that the ships are created with the following settings
 	//Host will broadcast to all players that the asteroids are created with the following settings
 	GameObjects_Initialisation,								//Payload: numberOfGameObjects, 
+															//		   GameObjectID
 															//         Each GameObject Details
 
 
