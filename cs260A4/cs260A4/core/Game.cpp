@@ -75,7 +75,7 @@ void Game::Run()
 		_inputSystem.Update();						//get inputs
 		_logicSystem.Update(
 			_inputSystem, 
-			dt, _gametime.GetDuration());  //check player logic in input
+			dt, _gametime.GetDuration(), _factory);  //check player logic in input
 		
 		
 		_physicSystem.Update();						//update physics

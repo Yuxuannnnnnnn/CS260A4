@@ -270,7 +270,7 @@ public:
 
 	//when looping through the eventslist in the update
 	//should lock the mutex before entering the loop
-	void Update(const InputSystem& inputsystem, float dt, float gametime);
+	void Update(const InputSystem& inputsystem, float dt, float gametime, Factory*);
 
 //----------------------Functions For NetworkSystem to use------------------------------------
 
@@ -293,9 +293,9 @@ private:
 	int _loopCounter = 0;
 	int _synCount = 10;
 
-	void PullEvent(float currgametime);
+	void PullEvent(float currgametime, Factory*);
 	void SynchronisePosition();
-	void PerformDR(GameObject* ship, float currgametime, float drtime, Vector2 accleration);
+	void PerformDR(GameObject& ship, const DRData& drdata, float currgametime);
 
 	float Wrap(float x, float x0, float x1);
 	float acceleration_speed = 40.0f;

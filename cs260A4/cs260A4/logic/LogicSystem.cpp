@@ -3,96 +3,121 @@
 #include "../core/GameObject.h"
 #include "../physics/Vector2.h"
 #include "../network/GameCommands.h"
+#include <winsock.h>
 
 
 
 
 
 
-void LogicSystem::Update(const InputSystem& inputsystem, float dt, float gametime)
+void LogicSystem::Update(const InputSystem& inputsystem, float dt, float gametime, Factory* factory)
 {
 
 
 
 
-	// find Ship belong to this client
-	GameObject* ship = nullptr;
+	// get the reference of Ship belong to this client
+	GameObject& ownship = factory->getOwnPlayer();
 
+	/*
+		From CS230:
+	*/
+
+	// This input handling moves the ship without any velocity nor acceleration
+	// It should be changed when implementing the Asteroids project
+	//
+	// Updating the velocity and position according to acceleration is 
+	// done by using the following:
+	// Pos1 = 1/2 * a*t*t + v0*t + Pos0
+	//
+	// In our case we need to divide the previous equation into two parts in order 
+	// to have control over the velocity and that is done by:
+	//
+	// v1 = a*t + v0		//This is done when the UP or DOWN key is pressed 
+	// Pos1 = v1*t + Pos0
 
 	if (inputsystem.KeyHold(VK_W))
 	{
-		Vector2 accel{ cosf(ship->transform.rotation) * acceleration_speed * dt,
-							 sinf(ship->transform.rotation) * acceleration_speed * dt };
+		Vector2 accel{ cosf(ownship.transform.rotation) * acceleration_speed * dt,
+							 sinf(ownship.transform.rotation) * acceleration_speed * dt };
 
-		ship->rigidbody.acceleration = accel;
+		factory->getOwnPlayer().rigidbody.acceleration = accel;
 
 		// broadcast this acceleration to all other client
 
 
 
-		// DOTO:: get the player index
-		int playerindex = 0;
-		DRData drdata{ accel.x, accel.y, gametime, playerindex };
-		_InsertNotification(GameCommands::MoveForward, 
-			{ {(char*)&drdata, sizeof(DRData)} }, 
+		// _playerID is the global player index
+
+		// convert everything to string
+
+		std::string drdatastring;
+
+		// size of 
+		
+		DRData drdata{ (float)htonl(accel.x), (float)htonl(accel.y), htonl(gametime), htonl(_playerID) };
+		
+		
+		_InsertNotification(GameCommands::MoveForward,
+			{ {(char*)&drdata, sizeof(DRData)} },
 			-1);
 
 		// end broadcast
-
-
-		ship->rigidbody.velocity = ship->rigidbody.velocity + accel;
+		ownship.rigidbody.velocity = ownship.rigidbody.velocity + accel;
 
 		// (from CS230) scale velocity by 0.99 to simulate drag and prevent velocity out of control
-		ship->rigidbody.velocity = ship->rigidbody.velocity * 0.99f;
+		ownship.rigidbody.velocity = ownship.rigidbody.velocity * 0.99f;
 	}
 
 	if (inputsystem.KeyHold(VK_S))
 	{
-		Vector2 accel{ cosf(ship->transform.rotation) * -acceleration_speed * dt,
-							 sinf(ship->transform.rotation) * -acceleration_speed * dt };
+		Vector2 accel{ cosf(ownship.transform.rotation) * -acceleration_speed * dt,
+							 sinf(ownship.transform.rotation) * -acceleration_speed * dt };
 
-		ship->rigidbody.acceleration = accel;
+		ownship.rigidbody.acceleration = accel;
 
 		// DOTO:: get the player index
 
-		int playerindex = 0;
-		DRData drdata{ accel.x, accel.y, gametime, playerindex };
-		_InsertNotification(GameCommands::MoveForward, 
-			{ {(char*)&drdata, sizeof(DRData)} }, 
+
+		DRData drdata{ htonl(accel.x), htonl(accel.y), htonl(gametime), htonl(_playerID) };
+		_InsertNotification(GameCommands::MoveForward,
+			{ {(char*)&drdata, sizeof(DRData)} },
 			-1);
 		// broadcast this acceleration to all other client
 
 		// end broadcast
 
-		ship->rigidbody.velocity = ship->rigidbody.velocity + accel;
+		ownship.rigidbody.velocity = ownship.rigidbody.velocity + accel;
 
 		// (from CS230) scale velocity by 0.99 to simulate drag and prevent velocity out of control
-		ship->rigidbody.velocity = ship->rigidbody.velocity * 0.99f;
+		ownship.rigidbody.velocity = ownship.rigidbody.velocity * 0.99f;
 	}
 
 	if (inputsystem.KeyHold(VK_A))
 	{
-		ship->transform.rotation += rotation_speed * dt;
-		ship->transform.rotation = Wrap(ship->transform.rotation, -PI, PI);
+		ownship.transform.rotation += rotation_speed * dt;
+		ownship.transform.rotation = Wrap(ownship.transform.rotation, -PI, PI);
 
 		// broadcast this acceleration to all other client
-		_InsertNotification(GameCommands::RotateLeft, 
-			{ {(char*)&ship->transform.rotation, sizeof(ship->transform.rotation)} }, 
+		_InsertNotification(GameCommands::RotateLeft,
+			{ {(char*)&ownship.transform.rotation, sizeof(ownship.transform.rotation)} },
 			-1);
 		// end broadcast
 	}
 
 	if (inputsystem.KeyHold(VK_D))
 	{
-		ship->transform.rotation -= rotation_speed * dt;
-		ship->transform.rotation = Wrap(ship->transform.rotation, -PI, PI);
+		ownship.transform.rotation -= rotation_speed * dt;
+		ownship.transform.rotation = Wrap(ownship.transform.rotation, -PI, PI);
 
 		// broadcast this acceleration to all other client
-		_InsertNotification(GameCommands::RotateRight, 
-			{ {(char*)&ship->transform.rotation, sizeof(ship->transform.rotation)} },
+		_InsertNotification(GameCommands::RotateRight,
+			{ {(char*)&ownship.transform.rotation, sizeof(ownship.transform.rotation)} },
 			-1);
 		// end broadcast
 	}
+
+	PullEvent(gametime, factory);
 
 	_loopCounter++;
 	if (_loopCounter >= _synCount)
@@ -102,8 +127,57 @@ void LogicSystem::Update(const InputSystem& inputsystem, float dt, float gametim
 	}
 }
 
-void LogicSystem::PullEvent(float currgametime)
+void LogicSystem::PullEvent(float currgametime, Factory* factory)
 {
+
+	std::lock_guard<std::mutex> EventsListLock{ EventsList_Mutex };
+	for (int i = 0; i < EventsList.size(); i++)
+	{
+		auto& events = EventsList[i];
+		clientsAddressIndex clientAddrIndex = events.first;
+		Event event = events.second;
+		GameCommands command = event.first;
+
+		// when player move forward
+		if (command == GameCommands::MoveForward)
+		{
+			// get the player index
+			DRData drdata;
+			memcpy(&drdata, &(event.second[0]), sizeof(DRData));
+			drdata.accelx = ntohl(drdata.accelx);
+			drdata.accely = ntohl(drdata.accely);
+			drdata.gametime = ntohl(drdata.gametime);
+			drdata.playerindex = ntohl(drdata.playerindex);
+
+			PerformDR(factory->getPlayer(clientAddrIndex), drdata, currgametime);
+
+		}
+
+		else if (command == GameCommands::MoveBackward)
+		{
+			DRData drdata;
+			memcpy(&drdata, &(event.second[0]), sizeof(DRData));
+			drdata.accelx = ntohl(drdata.accelx);
+			drdata.accely = ntohl(drdata.accely);
+			drdata.gametime = ntohl(drdata.gametime);
+			drdata.playerindex = ntohl(drdata.playerindex);
+
+			PerformDR(factory->getPlayer(clientAddrIndex), drdata, currgametime);
+		}
+
+		else if (command == GameCommands::RotateLeft)
+		{
+
+		}
+		else if (command == GameCommands::RotateRight)
+		{
+
+		}
+
+	}
+
+
+	clearEventsToBeDeleted();
 	// while event list not empty, pull events
 	//for (auto& eventpair : EventsList)
 	//{
@@ -150,20 +224,23 @@ void LogicSystem::SynchronisePosition()
 	// send a syn command, of player position, rotation, velocity
 }
 
-void LogicSystem::PerformDR(GameObject* ship, float currgametime, float drtime, Vector2 accleration)
+void LogicSystem::PerformDR(GameObject& ship, const DRData& drdata, float currgametime)
 {
-
-	float timediff = currgametime - drtime;
-
-	// acceleration already multipled by deltatime before passed in
-	ship->rigidbody.velocity = ship->rigidbody.velocity + accleration;
-
-	// extrapolate the position base on time difference
-	ship->transform.position = ship->transform.position + ship->rigidbody.velocity * timediff;
 	// receive a ship player to perform DR
 	// receive the game time of the sender
 	// find the time difference, game time on this client - game time of sender
 	// calculate the DR position
+	float timediff = currgametime - drdata.gametime;
+
+	// acceleration already multipled by deltatime before passed in
+	ship.rigidbody.velocity = ship.rigidbody.velocity + Vector2{ drdata.accelx, drdata.accely };
+
+	// extrapolate the position base on time difference
+	ship.transform.position = ship.transform.position + ship.rigidbody.velocity * timediff;
+	
+	// CS230 stimulate drag 
+	ship.rigidbody.velocity = ship.rigidbody.velocity * 0.99f;
+
 }
 
 float LogicSystem::Wrap(float x, float x0, float x1)
