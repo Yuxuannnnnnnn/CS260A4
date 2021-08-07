@@ -27,13 +27,13 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	//constructor open up console
 	Console console;
 	/*  test graphics code, delete later
-	    TEST BEGIN
+		TEST BEGIN
 		*************************
 		KEY : W A S D SPACE
 
-	
+
 		REMOVE THE LINE BELOW (LINE 36) TO COMMENT OUT
-	*/         
+	*/
 	Transforms trans{ {-50,0},0,{25,15} };
 
 	std::vector<GameObject> objlist;
@@ -60,7 +60,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 		float scal = rand() % 50 + 30;
 		trans.scale = { scal,scal };
-		Rigidbody rb{ Vector2{ 35,30} };
+		Rigidbody rb{ Vector2{ 35.0f + i, 30.0f - i} };
 		if (i % 2 == 0)
 			rb.velocity.x = -35;
 
@@ -79,7 +79,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	return 0;
 
-	/* 
+	/*
 			TEST END
 		*******************************************
 	*/
