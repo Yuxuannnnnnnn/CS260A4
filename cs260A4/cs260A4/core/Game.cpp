@@ -95,5 +95,8 @@ void Game::Run()
 	}
 
 	//std::cout << "delta time is " << _dt.GetDuration() << std::endl;
+
+
+	NetworkSystem_Thread.join();
 }
 
