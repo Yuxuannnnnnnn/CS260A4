@@ -356,6 +356,8 @@ public:
 		Insert_Vec2_MessageList(messageList, object.transform.scale);
 		Insert_Number_MessageList(messageList, object.transform.rotation);
 
+		Insert_Vec2_MessageList(messageList, object.rigidbody.velocity);
+		
 		Insert_Number_MessageList(messageList, object.mesh);
 		Insert_Vec3_MessageList(messageList, object.color);
 
@@ -397,9 +399,9 @@ public:
 	void ExtractDRData_MessageList(int index, MessageList& messageList, DRData& drdata)
 	{
 		Extract_Number_MessageList(index, messageList, drdata.accelx);
-		Extract_Number_MessageList(index, messageList, drdata.accely);
-		Extract_Number_MessageList(index, messageList, drdata.gametime);
-		Extract_Number_MessageList(index, messageList, drdata.playerindex);
+		Extract_Number_MessageList(index + 1, messageList, drdata.accely);
+		Extract_Number_MessageList(index + 2, messageList, drdata.gametime);
+		Extract_Number_MessageList(index + 3, messageList, drdata.playerindex);
 	}
 
 	void ExtractGameObject_MessageList(int index, MessageList& messageList, GameObject& object)
@@ -408,20 +410,14 @@ public:
 		Extract_Vec2_MessageList(index + 2, messageList, object.transform.scale);
 		Extract_Number_MessageList(index + 4, messageList, object.transform.rotation);
 
-		Extract_Number_MessageList(index + 5, messageList, object.mesh);
-		Extract_Vec3_MessageList(index + 6, messageList, object.color);
+		Extract_Vec2_MessageList(index + 5, messageList, object.rigidbody.velocity);
 
-		Extract_Number_MessageList(index + 9, messageList, object.obj_type);
-		Extract_Number_MessageList(index + 10, messageList, object.playerIndex);
+		Extract_Number_MessageList(index + 7, messageList, object.mesh);
+		Extract_Vec3_MessageList(index + 8, messageList, object.color);
+
+		Extract_Number_MessageList(index + 11, messageList, object.obj_type);
+		Extract_Number_MessageList(index + 12, messageList, object.playerIndex);
 	}
-
-
-
-
-
-
-
-
 
 
 

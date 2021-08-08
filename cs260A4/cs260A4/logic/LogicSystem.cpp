@@ -227,10 +227,10 @@ void LogicSystem::PullEvent(float currgametime, Factory* factory)
 			for (size_t i = 0; i < NumberOfGameObjects; i++)
 			{
 				int gameObjectID = 0;
-				Extract_Number_MessageList(i * 12 + 1, messageList, gameObjectID);
+				Extract_Number_MessageList(i * 14 + 1, messageList, gameObjectID);
 
 				GameObject object;
-				ExtractGameObject_MessageList(i * 12 + 2, messageList, object);
+				ExtractGameObject_MessageList(i * 14 + 2, messageList, object);
 				factory->insertGameObject(gameObjectID, object);
 
 				factory->insertPlayerID_GameObject(object.playerIndex, gameObjectID);
@@ -245,10 +245,10 @@ void LogicSystem::PullEvent(float currgametime, Factory* factory)
 			for (size_t i = 0; i < NumberOfGameObjects; i++)
 			{
 				int gameObjectID = 0;
-				Extract_Number_MessageList(i * 12 + 1, messageList, gameObjectID);
+				Extract_Number_MessageList(i * 14 + 1, messageList, gameObjectID);
 
 				GameObject object;
-				ExtractGameObject_MessageList(i * 12 + 2, messageList, object);
+				ExtractGameObject_MessageList(i * 14 + 2, messageList, object);
 				factory->insertGameObject(gameObjectID, object);
 			}
 		}

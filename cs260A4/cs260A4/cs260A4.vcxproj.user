@@ -4,11 +4,11 @@
     <ShowAllFiles>true</ShowAllFiles>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <LocalDebuggerCommandArguments>localhost:8080 localhost:8082 localhost:8081 localhost:8083</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>localhost:8082 localhost:8080 localhost:8083 localhost:8081</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <LocalDebuggerCommandArguments>localhost:8080 localhost:8082 localhost:8081 localhost:8083</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>localhost:8082 localhost:8080 localhost:8083 localhost:8081</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -16,7 +16,7 @@
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <LocalDebuggerCommandArguments>localhost:8080 localhost:8082 localhost:8081 localhost:8083</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>localhost:8082 localhost:8080 localhost:8083 localhost:8081</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
 </Project>
