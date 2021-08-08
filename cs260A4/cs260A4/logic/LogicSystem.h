@@ -9,6 +9,7 @@
 #include <map>
 #include "DRData.h"
 #include "../core/GameObject.h"
+#include <algorithm>
 
 #include <typeinfo> //For typeid() function
 
@@ -250,6 +251,7 @@ public:
 
 	void clearEventsToBeDeleted()
 	{
+		std::sort(EventsDeletionList.begin(), EventsDeletionList.end(), std::greater<int>());
 		for (auto& deleteEvent : EventsDeletionList)
 		{
 			EventsList.erase(EventsList.begin() + deleteEvent);
@@ -404,14 +406,24 @@ public:
 	{
 		Extract_Vec2_MessageList(index, messageList, object.transform.position);
 		Extract_Vec2_MessageList(index + 2, messageList, object.transform.scale);
-		Extract_Number_MessageList(index + 3, messageList, object.transform.rotation);
+		Extract_Number_MessageList(index + 4, messageList, object.transform.rotation);
 
-		Extract_Number_MessageList(index + 4, messageList, object.mesh);
-		Extract_Vec3_MessageList(index + 5, messageList, object.color);
+		Extract_Number_MessageList(index + 5, messageList, object.mesh);
+		Extract_Vec3_MessageList(index + 6, messageList, object.color);
 
-		Extract_Number_MessageList(index + 8, messageList, object.obj_type);
-		Extract_Number_MessageList(index + 9, messageList, object.playerIndex);
+		Extract_Number_MessageList(index + 9, messageList, object.obj_type);
+		Extract_Number_MessageList(index + 10, messageList, object.playerIndex);
 	}
+
+
+
+
+
+
+
+
+
+
 
 
 	//function to extract an vec3 from the messageList
@@ -440,7 +452,8 @@ public:
 
 		std::string NumberString = buffer;
 
-		if (typeid(type) == typeid(int))
+		if (typeid(type) == typeid(int) || typeid(type) == typeid(MeshType) ||
+			typeid(type) == typeid(TYPE))
 		{
 			number = (type)stoi(NumberString);
 		}
