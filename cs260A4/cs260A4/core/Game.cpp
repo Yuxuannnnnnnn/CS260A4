@@ -78,7 +78,7 @@ void Game::Run()
 			dt, _gametime.GetDuration(), _factory);  //check player logic in input
 		
 		
-		_physicSystem.Update();						//update physics
+		_physicSystem.Update(_factory);						//update physics
 
 		_graphicsSystem.Update(_factory);					//update graphics
 		_graphicsSystem.LateUpdate();				//update graphics - swap buffer

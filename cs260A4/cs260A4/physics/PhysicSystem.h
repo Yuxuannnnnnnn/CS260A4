@@ -2,11 +2,11 @@
 #include "AABBCollider.h"
 #include "../core/GameObject.h"
 #include <vector>
-
+#include "../core/Factory.h"
 class PhysicSystem
 {
 public:
-	void Update();
+	void Update(Factory* factory);
 	void TestUpdate(std::vector<GameObject>& objlist, float dt)
 	{
 		for (auto& gameobj : objlist)
@@ -65,6 +65,6 @@ private:
 		return x;
 	}
 
-	void UpdateTransform(GameObject* gameobj, float dt);
+	void UpdateTransform(GameObject& gameobj, float dt);
 	bool CollisionIntersection(const AABBCollider& aabb1, const AABBCollider& aabb2);
 };
