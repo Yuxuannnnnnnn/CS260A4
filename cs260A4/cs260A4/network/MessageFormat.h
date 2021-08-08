@@ -2,7 +2,7 @@
 #include <iostream>			// cout, cerr
 
 
-#define MESSAGE_MAX_BUFEFR 1100
+#define MESSAGE_MAX_BUFEFR 1024
 
 class Message
 {

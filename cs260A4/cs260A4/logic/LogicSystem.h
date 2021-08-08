@@ -192,8 +192,9 @@ public:
 			//make sure the network System is not insert events to the list
 			//while logicSystem is accessing the eventsList
 			std::lock_guard<std::mutex> EventsListLock{ EventsList_Mutex };
-			for (auto& events : EventsList)
+			for (int i = 0; i < EventsList.size(); i++)
 			{
+				auto& events = EventsList[i];
 				clientsAddressIndex clientAddrIndex = events.first;
 				Event event = events.second;
 				GameCommands command = event.first;
@@ -212,6 +213,7 @@ public:
 					//increment number of players that has made their playerID known
 					countPlayersSentIndex++;
 				}
+				EventsDeletionList.push_back(i);
 			}
 			clearEventsToBeDeleted();
 
@@ -277,25 +279,37 @@ public:
 			_InsertNotification(GameCommands::SynchronisePlayer, messageList, -1);
 
 
-			messageList.clear();
-
-			//players need to know the number of gameObjects in each message
-			//push number of gameObjects
-			Insert_Number_MessageList(messageList, AsteroidsList.size());
-
-			for (auto& object : AsteroidsList)
+			int asteroidsCounter = 0;
+			//send a message packet, 10 asteroids by 10 asteroids
+			while (asteroidsCounter < AsteroidsList.size())
 			{
-				//players need to know the gameObjectID of each gameObject
-				//push gameObjectID
-				Insert_Number_MessageList(messageList, object);
+				messageList.clear();
 
-				//players need to know the details of each gameObjects
-				GameObject& obj = gameFactory->getGameObject(object);
-				InsertGameObject_MessageList(messageList, obj);
+				//add new asteroids count to the asteroidsCounter
+				int addNewAsteroids =(AsteroidsList.size() - asteroidsCounter) < 5 ?
+					(AsteroidsList.size() - asteroidsCounter) : 5;
+
+				//players need to know the number of gameObjects in each message
+				//push number of gameObjects
+				Insert_Number_MessageList(messageList, addNewAsteroids);
+				for (int i = 0; i < addNewAsteroids ; i++)
+				{
+					auto& object = AsteroidsList[asteroidsCounter + i];
+					//players need to know the gameObjectID of each gameObject
+					//push gameObjectID
+					Insert_Number_MessageList(messageList, object);
+
+					//players need to know the details of each gameObjects
+					GameObject& obj = gameFactory->getGameObject(object);
+					InsertGameObject_MessageList(messageList, obj);
+				}
+
+				_InsertNotification(GameCommands::SyncrhoniseAsteroids, messageList, -1);
+
+
+				asteroidsCounter += addNewAsteroids;
+
 			}
-
-			_InsertNotification(GameCommands::SyncrhoniseAsteroids, messageList, -1);
-
 
 		}
 	}
@@ -350,14 +364,14 @@ public:
 	void ExtractGameObject_MessageList(int index, MessageList& messageList, GameObject& object)
 	{
 		Extract_Vec2_MessageList(index, messageList, object.transform.position);
-		Extract_Vec2_MessageList(index, messageList, object.transform.scale);
-		Extract_Number_MessageList(index, messageList, object.transform.rotation);
+		Extract_Vec2_MessageList(index + 2, messageList, object.transform.scale);
+		Extract_Number_MessageList(index + 3, messageList, object.transform.rotation);
 
-		Extract_Number_MessageList(index, messageList, object.mesh);
-		Extract_Vec3_MessageList(index, messageList, object.color);
+		Extract_Number_MessageList(index + 4, messageList, object.mesh);
+		Extract_Vec3_MessageList(index + 5, messageList, object.color);
 
-		Extract_Number_MessageList(index, messageList, object.obj_type);
-		Extract_Number_MessageList(index, messageList, object.playerIndex);
+		Extract_Number_MessageList(index + 8, messageList, object.obj_type);
+		Extract_Number_MessageList(index + 9, messageList, object.playerIndex);
 	}
 
 
@@ -365,15 +379,15 @@ public:
 	void Extract_Vec3_MessageList(int index, MessageList& messageList, Vector3& vec)
 	{
 		Extract_Number_MessageList(index, messageList, vec.x);
-		Extract_Number_MessageList(index, messageList, vec.y);
-		Extract_Number_MessageList(index, messageList, vec.z);
+		Extract_Number_MessageList(index + 1, messageList, vec.y);
+		Extract_Number_MessageList(index + 2, messageList, vec.z);
 	}
 
 	//function to extract an vec2 from the messageList
 	void Extract_Vec2_MessageList(int index, MessageList& messageList, Vector2& vec)
 	{
 		Extract_Number_MessageList(index, messageList, vec.x);
-		Extract_Number_MessageList(index, messageList, vec.y);
+		Extract_Number_MessageList(index + 1, messageList, vec.y);
 	}
 
 

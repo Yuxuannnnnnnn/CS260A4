@@ -267,9 +267,8 @@ void LogicSystem::PullEvent(float currgametime, Factory* factory)
 		}
 
 	}
+	EventsList.clear();
 
-
-	clearEventsToBeDeleted();
 	// while event list not empty, pull events
 	//for (auto& eventpair : EventsList)
 	//{

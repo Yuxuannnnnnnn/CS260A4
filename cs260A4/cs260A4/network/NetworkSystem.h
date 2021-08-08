@@ -86,12 +86,15 @@ public:
 	{
 		//if no clientAddressIndex is indicated in the paramters
 		//then broadcast the message to everyone
+
+		Message mess = CreateClientMessage(command, messageList);
+
 		if(clientAddressIndex == -1)
-			clientUDPsock.BroadcastMessage(CreateClientMessage(command, messageList));
+			clientUDPsock.BroadcastMessage(mess);
 		else //send to the specific client
 		{
 			clientUDPsock.SendClientMessage(clientAddressIndex,
-				CreateClientMessage(command, messageList));
+				mess);
 		}
 
 	}

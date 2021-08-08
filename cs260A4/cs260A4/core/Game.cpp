@@ -63,7 +63,7 @@ void Game::Run()
 
 
 	_logicSystem.Wait_ForAllPlayers();
-
+	_logicSystem.HostInitGame();
 
 	while (GameIsRunning())
 	{

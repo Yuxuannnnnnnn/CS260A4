@@ -222,37 +222,12 @@ void GraphicsSystem::Update(Factory* factory)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
-
 	//std::cout << factory->gameObjects.size() << std::endl;
-
 
 	for (auto& pair : factory->gameObjects)
 	{
 		RenderGameObject(pair.second);
 	}
-
-
-	////test draw quad mesh
-
-	glBindVertexArray(_vaoquad);
-
-
-	glm::mat4 model = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
-	glm::mat4 view = glm::mat4(1.0f);
-
-	model = glm::translate(model, glm::vec3(100, 10, 1));
-	model = glm::rotate(model, 0.0f, glm::vec3(0.0f, 0.0f, 1));
-	model = glm::scale(model, glm::vec3(100, 100, 1));
-
-	glm::mat4 mvp = proj * model;
-
-	_shader.use();
-	_shader.setMat4("u_MVP", mvp);
-	_shader.setVec3("u_Color", 0, 1, 0);
-
-	glDrawArrays(GL_TRIANGLES, 0, 6);
-	 
-
 
 
 	 //*/

@@ -34,6 +34,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 		REMOVE THE LINE BELOW (LINE 36) TO COMMENT OUT
 	*/
+	/*
 	Transforms trans{ {-50,0},0,{25,15} };
 
 	std::vector<GameObject> objlist;
@@ -50,34 +51,34 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	trans.position.x = 40;
 
 	objlist.push_back(GameObject{ trans, Rigidbody{}, TYPE_PLAYER, triangle, 3 });
-
-	trans.rotation = 0;
-	for (int i = 0; i < 4; ++i)
-	{
-		srand(time(NULL));
-
-		trans.position = { rand() % (50 + i) + 50.0f,  rand() % (50 - i) + 50.0f };
-
-		float scal = rand() % 50 + 30;
-		trans.scale = { scal,scal };
-		Rigidbody rb{ Vector2{ 35.0f + i, 30.0f - i} };
-		if (i % 2 == 0)
-			rb.velocity.x = -35;
-
-		objlist.push_back(GameObject{ trans, rb, TYPE_ASTEROID });
-	}
-
-
-	std::unique_ptr<TestGame> testgame =
-		std::make_unique<TestGame>
-		(hInstance, nCmdShow,
-			WINDOW_WIDTH, WINDOW_HEIGHT, objlist);
-
-
-	testgame->Run();
+	
+	trans.rotation = 0;*/
+	//for (int i = 0; i < 4; ++i)
+	//{
+	//	srand(time(NULL));
+	//
+	//	trans.position = { rand() % (50 + i) + 50.0f,  rand() % (50 - i) + 50.0f };
+	//
+	//	float scal = rand() % 50 + 30;
+	//	trans.scale = { scal,scal };
+	//	Rigidbody rb{ Vector2{ 35.0f + i, 30.0f - i} };
+	//	if (i % 2 == 0)
+	//		rb.velocity.x = -35;
+	//
+	//	objlist.push_back(GameObject{ trans, rb, TYPE_ASTEROID });
+	//}
+	//
+	//
+	//std::unique_ptr<TestGame> testgame =
+	//	std::make_unique<TestGame>
+	//	(hInstance, nCmdShow,
+	//		WINDOW_WIDTH, WINDOW_HEIGHT, objlist);
 
 
-	return 0;
+	//testgame->Run();
+	//
+	//
+	//return 0;
 
 	/*
 			TEST END

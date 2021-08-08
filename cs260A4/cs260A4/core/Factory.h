@@ -5,6 +5,9 @@
 #include <array>
 #include <unordered_map>
 #include <time.h>
+#include <thread>
+
+
 
 
 #ifndef FACTORY
@@ -67,7 +70,7 @@ public:
 			//create all other clients ship & assign the indices to them
 			if (playerID != i)
 			{
-				playerObjectsList[i] =  CreateShip(i, colorList[i]);
+				playerObjectsList[i] =  CreateShip(i, colorList[i-1]);
 			}
 		}
 
@@ -101,10 +104,26 @@ public:
 		int numberOfAsteroids = (rand() % 50) + 20;
 
 		std::vector <gameObjectID> objectlist;
-		for (size_t i = 0; i < numberOfAsteroids; i++)
+		for (int i = 0; i < numberOfAsteroids; i++)
 		{
-			objectlist.push_back(CreateAsteroid());
+			if (!(i % 10))
+			{
+				std::this_thread::sleep_for(std::chrono::milliseconds(50));
+				srand(time(NULL));
+			}
+			if (i % 2)
+			{
+				int seed = -(rand() % 100);
+				objectlist.push_back(CreateAsteroid(seed));
+			}
+			else
+			{
+				int seed = (rand() % 120);
+				objectlist.push_back(CreateAsteroid(seed + 100));
+			}
+
 		}
+		return objectlist;
 	}
 
 
@@ -112,19 +131,18 @@ public:
 	// They will broadcast to everyone the asteroid positions & velocity
 	// 
 	//All other clients will insert the list of gameObjects
-	gameObjectID CreateAsteroid()
+	gameObjectID CreateAsteroid(int seed)
 	{
 		//random velocity will be 5 to 20
 		//color will be purple for every asteriod, (1, 0, 1)
 
 		gameObjects[counterID] = GameObject{};
 
-		gameObjects[counterID].transform.position = { 0.f, 0.f };
+		gameObjects[counterID].transform.position = { (float)(rand() % 100) + 5.0f + seed, (float)(rand() % 100) + seed };
 		gameObjects[counterID].transform.scale = { 20.f, 20.f };
 		gameObjects[counterID].transform.rotation = 0.f;
 
-		srand(time(NULL));
-		gameObjects[counterID].rigidbody.velocity = { (float)(rand() % 15) + 5.0f, (float)(rand() % 15) + 5.0f };
+		gameObjects[counterID].rigidbody.velocity = { (float)(rand() % 15) + 5.0f + seed, (float)(rand() % 15) + 5.0f + seed };
 
 		gameObjects[counterID].mesh = MeshType::quad;
 		gameObjects[counterID].color = {1.f, 0.f, 1.f};
