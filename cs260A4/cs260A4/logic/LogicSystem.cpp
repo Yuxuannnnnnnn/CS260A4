@@ -74,16 +74,17 @@ void LogicSystem::Update(const InputSystem& inputsystem, float dt, float gametim
 
 		ownship.rigidbody.acceleration = accel;
 
-		// DOTO:: get the player index
 
+		// playerID is the global ID 
 
-		//DRData drdata{ htonl(accel.x), htonl(accel.y), htonl(gametime), htonl(_playerID) };
-		/*_InsertNotification(GameCommands::MoveForward,
-			{ {(char*)&drdata, sizeof(DRData)} },
-			-1);*/
-			// broadcast this acceleration to all other client
+		DRData drdata{ accel.x, accel.y, gametime, _playerID };
 
-			// end broadcast
+		MessageList messageList;
+		InsertDRData_MessageList(messageList, drdata);
+
+		// -1 is broadcast
+		_InsertNotification(GameCommands::MoveForward, { messageList }, -1);
+
 
 		ownship.rigidbody.velocity = ownship.rigidbody.velocity + accel;
 
@@ -185,6 +186,27 @@ void LogicSystem::TestUpdate(const InputSystem& inputsystem, float dt, std::vect
 
 }
 
+void LogicSystem::Lock_Step(GameCommands gamecommands)
+{
+	committment = Hash(gamecommands);
+
+	// broadcast the commitment
+
+	// get everyone else commitments ( other people also broadcasting)
+
+	// wait till everyone ready
+
+	// annouce action
+
+	// validate action
+
+}
+
+void* LogicSystem::Hash(GameCommands gamecommands)
+{
+	return nullptr;
+}
+
 void LogicSystem::PullEvent(float currgametime, Factory* factory)
 {
 
@@ -233,20 +255,17 @@ void LogicSystem::PullEvent(float currgametime, Factory* factory)
 		// when player move forward
 		else if (command == GameCommands::MoveForward)
 		{
-			// get the player index
-		/*	DRData drdata;
-			memcpy(&drdata, &(event.second[0]), sizeof(DRData));
-			drdata.accelx = ntohl(drdata.accelx);
-			drdata.accely = ntohl(drdata.accely);
-			drdata.gametime = ntohl(drdata.gametime);
-			drdata.playerindex = ntohl(drdata.playerindex);
-
-			PerformDR(factory->getPlayer(clientAddrIndex), drdata, currgametime);*/
-
+			DRData drdata;
+			ExtractDRData_MessageList(0, messageList, drdata);
+			PerformDR(factory->getPlayer(drdata.playerindex), drdata, currgametime);
 		}
 
 		else if (command == GameCommands::MoveBackward)
 		{
+
+			DRData drdata;
+			ExtractDRData_MessageList(0, messageList, drdata);
+			PerformDR(factory->getPlayer(drdata.playerindex), drdata, currgametime);
 			/*DRData drdata;
 			memcpy(&drdata, &(event.second[0]), sizeof(DRData));
 			drdata.accelx = ntohl(drdata.accelx);
@@ -259,11 +278,15 @@ void LogicSystem::PullEvent(float currgametime, Factory* factory)
 
 		else if (command == GameCommands::RotateLeft)
 		{
-
+			float receivedRotation;
+			Extract_Number_MessageList(0, messageList, receivedRotation);
+			factory->getPlayer(clientAddrIndex).transform.rotation = receivedRotation;
 		}
 		else if (command == GameCommands::RotateRight)
 		{
-
+			float receivedRotation;
+			Extract_Number_MessageList(0, messageList, receivedRotation);
+			factory->getPlayer(clientAddrIndex).transform.rotation = receivedRotation;
 		}
 
 	}
@@ -323,13 +346,13 @@ void LogicSystem::PerformDR(GameObject& ship, const DRData& drdata, float currga
 	// calculate the DR position
 	float timediff = currgametime - drdata.gametime;
 
-	// acceleration already multipled by deltatime before passed in
-	ship.rigidbody.velocity = ship.rigidbody.velocity + Vector2{ drdata.accelx, drdata.accely };
+
+	ship.rigidbody.velocity = ship.rigidbody.velocity + Vector2{ drdata.accelx, drdata.accely } *timediff;
 
 	// extrapolate the position base on time difference
 	ship.transform.position = ship.transform.position + ship.rigidbody.velocity * timediff;
 
-	// CS230 stimulate drag 
+	// CS230 : stimulate drag and prevent velocity go out of control
 	ship.rigidbody.velocity = ship.rigidbody.velocity * 0.99f;
 
 }

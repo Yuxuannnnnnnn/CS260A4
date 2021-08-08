@@ -36,6 +36,15 @@ enum class GameCommands
 	//For Logic System usage
 	SendAcceleration,
 
+	//For Lock-Step
+	
+	// initialiate an lockstep
+	InitLockStep,
+	// reply lockstep
+	ReplyLockStep,
+	SynchronizeAction,
+	AnnounceAction,
+
 
 
 	//Example format
