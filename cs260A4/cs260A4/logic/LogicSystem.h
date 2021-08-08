@@ -6,6 +6,7 @@
 #include <mutex>
 #include <functional>
 #include <string>
+#include <map>
 #include "DRData.h"
 #include "../core/GameObject.h"
 
@@ -28,6 +29,7 @@
 
 class LogicSystem
 {
+private:
 	typedef std::vector<Message> MessageList;
 	typedef std::pair<GameCommands, MessageList> Event;
 	typedef int clientsAddressIndex;
@@ -77,7 +79,28 @@ class LogicSystem
 	//store factory - for game objects creation
 	Factory* gameFactory;
 
+	/*
+	*	lock-step protocol
+	*/
+	
+	// player's commitment
 
+	void* committment;
+	// playernumber , hashed commitment
+	//        0     ,   ........
+	//        1     ,   ........
+	//        2     ,   ........
+	//        3     ,   ........
+	std::map<playerID, void*> other_commitments;
+
+	// wait till everyone ready
+	bool _islocking;
+	float _waitingTime = 0;
+
+	void Lock_Step(GameCommands gamecommands);
+
+	// encrypt gamecommand using hash
+	void* Hash(GameCommands gamecommands);
 public:
 
 //--------------------Initialise the LogicSystem------------------------------------
@@ -303,6 +326,14 @@ public:
 
 //Insert to MessageList---------------------
 
+	void InsertDRData_MessageList(MessageList& messageList, const DRData& drdata)
+	{
+		Insert_Number_MessageList(messageList, drdata.accelx);
+		Insert_Number_MessageList(messageList, drdata.accely);
+		Insert_Number_MessageList(messageList, drdata.gametime);
+		Insert_Number_MessageList(messageList, drdata.playerindex);
+	}
+
 	void InsertGameObject_MessageList(MessageList& messageList, const GameObject& object)
 	{
 		Insert_Vec2_MessageList(messageList, object.transform.position);
@@ -346,6 +377,14 @@ public:
 
 
 //Extract From MessageList---------------------
+
+	void ExtractDRData_MessageList(int index, MessageList& messageList, DRData& drdata)
+	{
+		Extract_Number_MessageList(index, messageList, drdata.accelx);
+		Extract_Number_MessageList(index, messageList, drdata.accely);
+		Extract_Number_MessageList(index, messageList, drdata.gametime);
+		Extract_Number_MessageList(index, messageList, drdata.playerindex);
+	}
 
 	void ExtractGameObject_MessageList(int index, MessageList& messageList, GameObject& object)
 	{
@@ -426,6 +465,7 @@ public:
 		EventsList.push_back({ clientAddressIndex,_event });
 	}
 
+	
 
 private:
 
