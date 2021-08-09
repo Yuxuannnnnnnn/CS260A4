@@ -21,7 +21,8 @@ public:
 		int nCmdShow, 
 		unsigned width, 
 		unsigned height, 
-		Hostname_Port_List& list);
+		Hostname_Port_List& list,
+		bool customkey);
 	bool GameIsRunning() const;
 
 	void Run();

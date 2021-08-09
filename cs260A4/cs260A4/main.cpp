@@ -95,7 +95,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		std::make_unique<Game>
 		(hInstance, nCmdShow,
 			WINDOW_WIDTH, WINDOW_HEIGHT,
-			cmdParser.Get_HostName_Port_List());
+			cmdParser.Get_HostName_Port_List(), false); // true, use key from keybind.cfg
 
 	//run the game
 	game->Run();

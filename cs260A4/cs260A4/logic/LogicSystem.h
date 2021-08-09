@@ -24,12 +24,21 @@
 
 //for PRINTOUT function
 #include "../Tools/EngineSettings.h"
+#include <fstream>
 
 #define PI 3.1415926f
 
 
 class LogicSystem
 {
+	struct KeyBind
+	{
+		KEY move_forward;
+		KEY move_backward;
+		KEY rotate_left;
+		KEY rotate_right;
+		KEY shoot;
+	};
 private:
 	typedef std::vector<Message> MessageList;
 	typedef std::pair<GameCommands, MessageList> Event;
@@ -98,6 +107,10 @@ private:
 	bool _islocking;
 	float _waitingTime = 0;
 
+	// use key from keybind.cfg file
+	bool _useCustKey = false;
+	KeyBind _keybind;
+
 	void Lock_Step(GameCommands gamecommands);
 
 	// encrypt gamecommand using hash
@@ -108,7 +121,7 @@ public:
 
 	void Init(Factory* factory,
 		const InsertNotificationFunction& InsertNotification, 
-		int NumOfPlayersRequired)
+		int NumOfPlayersRequired, bool useCustKey)
 	{
 		//get function to insert notification to networkSystem
 		_InsertNotification = InsertNotification;
@@ -118,6 +131,49 @@ public:
 
 		//store factory - for game objects creation
 		gameFactory = factory;
+
+		_useCustKey = useCustKey;
+
+		if (_useCustKey)
+		{
+			std::ifstream filein{ "keybind.cfg" };
+			std::string str;
+
+			int keyindex = 0;
+
+			while (filein.good())
+			{
+				std::getline(filein, str);
+				
+				int key = std::stoi(str);
+
+				switch (keyindex)
+				{
+					// forward
+				case 0:
+					_keybind.move_forward = (KEY)key;
+					break;
+					// backward
+				case 1:
+					_keybind.move_backward = (KEY)key;
+					break;
+					// rotateleft
+				case 2:
+					_keybind.rotate_left = (KEY)key;
+					break;
+					// rotateright
+				case 3:
+					_keybind.rotate_right = (KEY)key;
+					break;
+					// shoot
+				case 4:
+					_keybind.shoot = (KEY)key;
+					break;
+				}
+
+				keyindex++;
+			}
+		}
 	}
 
 //--------------------Waiting for players to Join game------------------------------------

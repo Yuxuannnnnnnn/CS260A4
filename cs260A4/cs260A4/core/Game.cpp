@@ -7,7 +7,7 @@
 
 
 Game::Game(HINSTANCE hinstance, int nCmdShow, unsigned width, unsigned height, 
-	Hostname_Port_List& list) :
+	Hostname_Port_List& list, bool customkey) :
 	_windowSystem{ hinstance, nCmdShow, width, height },
 	_isGameRunning{ true }
 {
@@ -31,7 +31,7 @@ Game::Game(HINSTANCE hinstance, int nCmdShow, unsigned width, unsigned height,
 			std::placeholders::_1,
 			std::placeholders::_2, 
 			std::placeholders::_3), 
-		list.size());
+		list.size(), customkey);
 
 	_gametime.Start();
 }
