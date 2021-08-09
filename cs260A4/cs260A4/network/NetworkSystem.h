@@ -8,6 +8,7 @@
 #include <mutex>
 #include "../Tools/Timer.h"
 #include "../Tools/EngineSettings.h"
+#include "../logic/LogicSystem.h"
 #include <set>
 #include <string>
 #include <algorithm>
@@ -172,7 +173,7 @@ public:
 
 //---------------------Runs Seperate from the MainThread----------------------------
 
-	void ReceiveEventsFromClient()
+	void ReceiveEventsFromClient(LogicSystem * logicSystem)
 	{
 		//continuously receiveMessage from this client
 		while (true)
@@ -190,6 +191,16 @@ public:
 				clientAddressIndex,
 				Command,
 				message);
+
+
+			std::cout << std::endl;
+			PRINTOUT("Received Message from Client: ");
+			clientUDPsock.print_ipv4(&clientUDPsock.Index_Addresses[clientAddressIndex]);
+			if (logicSystem->clientAddrID_PlayerID_List.size())
+			{
+				std::cout << "Player:" << logicSystem->clientAddrID_PlayerID_List[clientAddressIndex]
+					<< std::endl;
+			}
 
 
 			//0 - socketerror

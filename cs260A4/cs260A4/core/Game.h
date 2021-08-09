@@ -32,7 +32,7 @@ private:
 	InputSystem _inputSystem;
 	WindowSystem _windowSystem;
 	PhysicSystem _physicSystem;
-	LogicSystem  _logicSystem;
+	LogicSystem  *_logicSystem;
 	GraphicsSystem _graphicsSystem;
 	Factory * _factory;
 

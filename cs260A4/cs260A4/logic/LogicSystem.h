@@ -40,7 +40,7 @@ class LogicSystem
 		KEY rotate_right;
 		KEY shoot;
 	};
-private:
+public:
 	typedef std::vector<Message> MessageList;
 	typedef std::pair<GameCommands, MessageList> Event;
 	typedef int clientsAddressIndex;

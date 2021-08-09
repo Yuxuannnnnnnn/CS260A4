@@ -16,15 +16,18 @@ Game::Game(HINSTANCE hinstance, int nCmdShow, unsigned width, unsigned height,
 	//graphics initialisation
 	_graphicsSystem.Init(_windowSystem.GetHandle());
 
+	_logicSystem = new LogicSystem{};
+
+
 	_networkSystem.Init(
 		list,
 		std::bind(&LogicSystem::InsertEvent, 
-		&_logicSystem, 
+		_logicSystem, 
 		std::placeholders::_1, 
 		std::placeholders::_2));
 
 
-	_logicSystem.Init(
+	_logicSystem->Init(
 		_factory,
 		std::bind(&NetworkSystem::InsertNotification,
 			&_networkSystem,
@@ -57,13 +60,13 @@ void Game::Run()
 	//from each address
 	std::thread NetworkSystem_Thread{
 			&NetworkSystem::ReceiveEventsFromClient,
-			std::ref(_networkSystem) };
+			std::ref(_networkSystem), _logicSystem };
 
 #endif
 
 
-	_logicSystem.Wait_ForAllPlayers(_windowSystem, _inputSystem);
-	_logicSystem.HostInitGame();
+	_logicSystem->Wait_ForAllPlayers(_windowSystem, _inputSystem);
+	_logicSystem->HostInitGame();
 
 	while (GameIsRunning())
 	{
@@ -73,7 +76,7 @@ void Game::Run()
 		_windowSystem.Update(_isGameRunning);		//Go through all Windows Messages
 
 		_inputSystem.Update();						//get inputs
-		_logicSystem.Update(
+		_logicSystem->Update(
 			_inputSystem, 
 			dt, _gametime.GetDuration(), _factory);  //check player logic in input
 		

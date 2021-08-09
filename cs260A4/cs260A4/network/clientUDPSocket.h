@@ -330,10 +330,7 @@ public:
 		//get the index of the client sock address
 		AddrIndex = findclientIndex(addr);
 
-		std::cout << std::endl;
-		PRINTOUT("Received Message from Client: ");
-		print_ipv4(&addr);
-		std::cout << std::endl;
+
 		return 1;
 
 	}
