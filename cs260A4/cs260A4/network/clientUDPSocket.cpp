@@ -118,7 +118,7 @@ int clientUDPSocket::Prep_UDPClientSocket(
 
 
 
-    //     This option is needed on the socket in order to be able to receive broadcast messages
+    //   This option is needed on the socket in order to be able to receive broadcast messages
     //   If not set the receiver will not receive broadcast messages in the local network.
     char broadcast = '1';
     if (setsockopt(clientUDPSock_, SOL_SOCKET, SO_BROADCAST, &broadcast, sizeof(broadcast)) < 0)
@@ -136,7 +136,6 @@ int clientUDPSocket::Prep_UDPClientSocket(
     Broadcast_Sending_addr.sin_addr.s_addr  = INADDR_BROADCAST; // this isq equiv to 255.255.255.255
 
 
-
     if (clientUDPSock_ == INVALID_SOCKET)
     {
         //std::cerr << "socket() failed"
@@ -146,11 +145,17 @@ int clientUDPSocket::Prep_UDPClientSocket(
         return 2;
     }
 
+    struct sockaddr_in Recv_addr;
+    Recv_addr.sin_family = AF_INET;
+    Recv_addr.sin_port = htons(port);
+    Recv_addr.sin_addr.s_addr = INADDR_ANY;
     //bind socket to network interface controller 
     errorCode = bind(
         clientUDPSock_,
-        info->ai_addr,
-        static_cast<int>(info->ai_addrlen));
+        (sockaddr*)&Recv_addr,//info->ai_addr,
+        sizeof(Recv_addr));//static_cast<int>(info->ai_addrlen));
+
+
 
     if (errorCode != NO_ERROR)
     {
@@ -218,7 +223,14 @@ int clientUDPSocket::Get_Store_ClientAddress(
         << inet_ntop(AF_INET, &Index_Addresses[clientIndex],
             buffer, 100)
         << ". " << std::endl;
+
+    //char s[INET6_ADDRSTRLEN];
+    //inet_ntop(hints.ai_family, ((struct sockaddr_in*)((struct sockaddr*)hints.ai_addr))->sin_addr, s, sizeof (s));
+
+    print_ipv4(&Index_Addresses[clientIndex]);
+
     std::cout << std::endl;
+
 
     //the addrinfo is no longer needed thus free the info
     freeaddrinfo(serverInfo);
@@ -243,6 +255,7 @@ int clientUDPSocket::udt_receive(
     sockaddr& addr, 
     int AddressSize)
 {
+
     //Initialize random number generator
     //The pseudo - random number generator is
         //initialized using the argument passed as seed.

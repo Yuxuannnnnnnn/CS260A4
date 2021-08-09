@@ -373,7 +373,27 @@ public:
 	}
 
 
-#define BROADCAST
+	void print_ipv4(struct sockaddr* s)
+	{
+		struct sockaddr_in* sin = (struct sockaddr_in*)s;
+		char ip[100] = "\0";
+		uint16_t port;
+
+		char buffer[100] = "\0";
+		//inet_ntop(AF_INET, (const void *)(sin->sin_addr),
+		//	buffer, 100);
+
+		strcpy(ip, (char*)inet_ntoa((struct in_addr)sin->sin_addr));
+
+
+		//inet_pton(AF_INET, buffer, ip);
+		port = htons(sin->sin_port);
+
+		printf("host port: %d, ip: %s\n", port, ip);
+	}
+
+
+//#define BROADCAST
 
 #ifndef BROADCAST
 
