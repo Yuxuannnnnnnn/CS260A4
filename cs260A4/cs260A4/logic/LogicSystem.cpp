@@ -348,7 +348,7 @@ void LogicSystem::PullEvent(float currgametime, Factory* factory)
 
 			// extract gameobject 
 			GameObject object;
-			ExtractGameObject_MessageList(0, messageList, object);
+			ExtractGameObject_MessageList(1, messageList, object);
 
 			// replace data with synchronised data
 			factory->gameObjects[gameObjectID] = object;
@@ -358,7 +358,7 @@ void LogicSystem::PullEvent(float currgametime, Factory* factory)
 			GameObject object;
 			ExtractGameObject_MessageList(0, messageList, object);
 
-			GameObject& player_toSyn = factory->getGameObject(object.playerIndex);
+			GameObject& player_toSyn = factory->getPlayer(object.playerIndex);
 			player_toSyn = object;
 
 		}
