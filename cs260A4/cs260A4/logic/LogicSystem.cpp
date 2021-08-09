@@ -9,7 +9,7 @@
 #define SYNCHRO 1
 
 // number of frames between each synchronise gameobject 
-#define SYNCHRO_COUNT 10
+#define SYNCHRO_COUNT 360 // every 3 seconds
 
 
 
@@ -128,7 +128,7 @@ void LogicSystem::Update(const InputSystem& inputsystem, float dt, float gametim
 		MessageList messageList;
 		Insert_Number_MessageList(messageList, ownship.transform.rotation);
 		// broadcast this acceleration to all other client
-		_InsertNotification(GameCommands::RotateLeft,
+		_InsertNotification(GameCommands::RotateRight,
 			{ messageList },
 			-1);
 
