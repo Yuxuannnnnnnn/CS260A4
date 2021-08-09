@@ -222,20 +222,23 @@ public:
 					//add this event to be deleted
 					EventsDeletionList.push_back(i);
 
-					//count the number of players already in the game
-					//so that I can assign a playerID to myself at the end
-					++_playerID;
-				
+					if (std::find(addressIndex.begin(), addressIndex.end(), clientAddrIndex) == addressIndex.end())
+					{
+						//count the number of players already in the game
+						//so that I can assign a playerID to myself at the end
+						++_playerID;
 
-					PRINTOUT("ClientAddressIndex: "
-						, clientAddrIndex
-						, " is in game.");
-					PRINTOUT("Player "
-						, _playerID -1
-						, " is in game.");
 
-					//increment number of players in the game
-					count_players_in_game++;
+						PRINTOUT("ClientAddressIndex: "
+							, clientAddrIndex
+							, " is in game.");
+						PRINTOUT("Player "
+							, _playerID - 1
+							, " is in game.");
+
+						//increment number of players in the game
+						count_players_in_game++;
+					}
 				}
 				//if clients never respond, then wait for them to send a joinedGame notification
 				else if (command == GameCommands::JoinGame)
