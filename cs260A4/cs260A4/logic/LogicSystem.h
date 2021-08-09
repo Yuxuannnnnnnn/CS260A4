@@ -90,6 +90,7 @@ public:
 	//store factory - for game objects creation
 	Factory* gameFactory;
 
+	bool isAlive = true;
 	/*
 	*	lock-step protocol
 	*/

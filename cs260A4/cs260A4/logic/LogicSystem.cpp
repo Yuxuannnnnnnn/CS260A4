@@ -154,9 +154,10 @@ void LogicSystem::Update(const InputSystem& inputsystem, float dt, float gametim
 
 
 	}
-
-	CheckCollision(factory);
-
+	if (_isHost)
+	{
+		CheckCollision(factory);
+	}
 #if SYNCHRO
 	_loopCounter++;
 	if (_loopCounter >= SYNCHRO_COUNT)
@@ -202,7 +203,7 @@ void LogicSystem::SynchronisePosition(Factory* factory)
 		}
 	}
 
-	
+
 	// send a syn command, of player position, rotation, velocity
 }
 void LogicSystem::TestUpdate(const InputSystem& inputsystem, float dt, std::vector<GameObject>& gameobjlist)
@@ -502,6 +503,16 @@ void LogicSystem::CheckCollision(Factory* factory)
 						factory->DeleteGameObjectID(pair2.first);
 					}
 				}
+
+				else if (pair2.second.obj_type == TYPE_PLAYER)
+				{
+					bool isCollided = CollisionIntersection(pair.second.aabb, pair2.second.aabb);
+					if (isCollided)
+					{
+						factory->DeleteGameObjectID(pair2.first);
+					}
+				}
+
 			}
 		}
 

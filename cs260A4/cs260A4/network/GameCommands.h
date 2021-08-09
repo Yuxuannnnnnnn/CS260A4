@@ -40,7 +40,8 @@ enum class GameCommands
 
 
 	//For Logic System usage
-
+	DeleteAsteriod,
+	PlayerDied,
 
 	//For Lock-Step
 	
