@@ -194,7 +194,7 @@ public:
 
 			//0 - socketerror
 			//2 - 0 bytes received
-			if (success == 0 || success == 2)
+			if (success == 0 || success == 2 || clientAddressIndex == -1)
 			{
 				//Command = client disconnected
 			}

@@ -65,6 +65,8 @@ int clientUDPSocket::Prep_UDPClientSocket(
     struct in_addr ip_addr = *(struct in_addr*)(ent->h_addr);
     clientUDP_HostNameString_ = inet_ntoa(ip_addr);
 
+
+
     //------------------------------------------------
     // Resolve a server host name into IP addresses
     // (in a singly-linked list)
@@ -114,6 +116,27 @@ int clientUDPSocket::Prep_UDPClientSocket(
     clientUDPSock_ = socket(info->ai_family,
         info->ai_socktype, info->ai_protocol);
 
+
+
+    //     This option is needed on the socket in order to be able to receive broadcast messages
+    //   If not set the receiver will not receive broadcast messages in the local network.
+    char broadcast = '1';
+    if (setsockopt(clientUDPSock_, SOL_SOCKET, SO_BROADCAST, &broadcast, sizeof(broadcast)) < 0)
+    {
+
+        std::cout << "Error in setting Broadcast option" << std::endl;
+        closesocket(clientUDPSock_);
+        return 0;
+    }
+
+    //set address to send for broadcasting
+    Broadcast_Sending_addr.sin_family = AF_INET;
+    short port = stoi(clientPortString);
+    Broadcast_Sending_addr.sin_port = htons(port);
+    Broadcast_Sending_addr.sin_addr.s_addr  = INADDR_BROADCAST; // this isq equiv to 255.255.255.255
+
+
+
     if (clientUDPSock_ == INVALID_SOCKET)
     {
         //std::cerr << "socket() failed"
@@ -144,7 +167,6 @@ int clientUDPSocket::Prep_UDPClientSocket(
     return NO_ERROR;
 
 }
-
 
 
 //get and store the clientAddress to send/recv data from
@@ -189,10 +211,14 @@ int clientUDPSocket::Get_Store_ClientAddress(
 
 
     char buffer[100] = "\0";
+
+    std::cout << "clientPortString: " << clientPortString << std::endl;
+    std::cout << "clientHostNameString: " << clientHostNameString << std::endl;
     std::cout << "Storing Address: "
         << inet_ntop(AF_INET, &Index_Addresses[clientIndex],
             buffer, 100)
         << ". " << std::endl;
+    std::cout << std::endl;
 
     //the addrinfo is no longer needed thus free the info
     freeaddrinfo(serverInfo);

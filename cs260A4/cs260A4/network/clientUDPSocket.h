@@ -75,6 +75,10 @@ public:
 	std::unordered_map<Index, sockaddr> Index_Addresses;
 
 
+	//address to send broadcast
+	struct sockaddr_in Broadcast_Sending_addr;
+
+
 	//A value  indicting a rate of packet loss simulated 
 		//during receiving of data over UDP.
 	float RateOfPacketLoss_{ 0.0f };
@@ -106,6 +110,7 @@ public:
 		// own Port number - from config file
 		const std::string& clientPortString
 	);
+
 
 
 	//get and store the clientAddress to send/recv data from
@@ -158,6 +163,8 @@ public:
 				return addrPair.first;
 			}
 		}
+
+		return -1;
 	}
 
 
@@ -366,6 +373,10 @@ public:
 	}
 
 
+#define BROADCAST
+
+#ifndef BROADCAST
+
 	//send the message to all clients
 	void BroadcastMessage(const Message& message)
 	{
@@ -379,6 +390,37 @@ public:
 
 	}
 
+#else
+
+	bool BroadcastMessage(const Message& message)
+	{
+		//get client adress to send message to
+		int AddressSize = sizeof(struct sockaddr_in);
+
+		//require to attach this client address to inform
+		//the other client who is sending the meessage?
+
+		int TotalBytesSent = 0;
+		while (TotalBytesSent != (message.size_))
+		{
+			const int bytesSent = sendto(clientUDPSock_,
+				message.message + TotalBytesSent,
+				(int)message.size_ - TotalBytesSent, 0,
+				(sockaddr*)&Broadcast_Sending_addr, AddressSize);
+
+			TotalBytesSent += bytesSent;
+			//failed to send bytes to the client
+			if (bytesSent == SOCKET_ERROR)
+			{
+				//std::cerr << "send() failed." << std::endl;
+				return false;
+				//break;
+			}
+		}
+		return true;
+	}
+
+#endif
 //------------------------Shutdown functions---------------------------
 
 	   //Shutdown and close clientSocket
