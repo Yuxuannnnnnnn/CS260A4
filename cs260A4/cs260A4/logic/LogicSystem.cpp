@@ -169,6 +169,8 @@ void LogicSystem::Update(const InputSystem& inputsystem, float dt, float gametim
 
 	PullEvent(gametime, factory);
 }
+
+
 void LogicSystem::SynchronisePosition(Factory* factory)
 {
 
@@ -181,25 +183,63 @@ void LogicSystem::SynchronisePosition(Factory* factory)
 		{ messageList },
 		-1);
 
+	messageList.clear();
 
 	// host synchro asteroid velocity and position
 	if (_isHost)
 	{
+		int maxAsteroids = 5;
+		int asteroidsCounter = 0;
+
 		for (auto& pair : factory->gameObjects)
 		{
 			// check if object is asteriod
 			if (pair.second.obj_type == TYPE_ASTEROID)
 			{
+				asteroidsCounter++;
 
-				MessageList messageList;
+				auto& object = pair.second;
+
+				//players need to know the gameObjectID of each gameObject
+				//push gameObjectID
 				Insert_Number_MessageList(messageList, pair.first);
-				GameObject object = pair.second;
+
+				//players need to know the details of each gameObjects
 				InsertGameObject_MessageList(messageList, object);
 
-				_InsertNotification(GameCommands::Synchronise_Asteroids,
-					{ messageList },
-					-1);
+				//if number of asteroids have reached 5 in the packet
+				if (asteroidsCounter == maxAsteroids)
+				{
+					//players need to know the number of gameObjects in each message
+					//push number of gameObjects
+					FrontInsert_Number_MessageList(messageList, asteroidsCounter);
+
+					//send broadcast messsage
+					_InsertNotification(GameCommands::SyncrhoniseAsteroids, messageList, -1);
+
+					//restart the asteroids counter
+					asteroidsCounter = 0;
+					//restart messageList
+					messageList.clear();
+				}
+
 			}
+		}
+
+		//last packet to send
+		if (asteroidsCounter)
+		{
+			//players need to know the number of gameObjects in each message
+			//push number of gameObjects
+			FrontInsert_Number_MessageList(messageList, asteroidsCounter);
+
+			//send broadcast messsage
+			_InsertNotification(GameCommands::SyncrhoniseAsteroids, messageList, -1);
+
+			//restart the asteroids counter
+			asteroidsCounter = 0;
+			//restart messageList
+			messageList.clear();
 		}
 	}
 
@@ -360,19 +400,6 @@ void LogicSystem::PullEvent(float currgametime, Factory* factory)
 			float receivedRotation;
 			Extract_Number_MessageList(0, messageList, receivedRotation);
 			factory->getPlayer(clientAddrIndex).transform.rotation = receivedRotation;
-		}
-		else if (command == GameCommands::Synchronise_Asteroids)
-		{
-			// extract gameobject ID
-			int gameObjectID = 0;
-			Extract_Number_MessageList(0, messageList, gameObjectID);
-
-			// extract gameobject 
-			GameObject object;
-			ExtractGameObject_MessageList(1, messageList, object);
-
-			// replace data with synchronised data
-			factory->gameObjects[gameObjectID] = object;
 		}
 		else if (command == GameCommands::Synchronise_Player)
 		{
