@@ -282,6 +282,9 @@ public:
 		}
 
 	//---------------All clients have connected from this point----------------------
+		//let factory know yr playerID
+		gameFactory->_playerID = _playerID;
+
 
 		//broadcast to everyone, my player Index
 		_InsertNotification(
@@ -391,7 +394,7 @@ public:
 				messageList.clear();
 
 				//add new asteroids count to the asteroidsCounter
-				int addNewAsteroids =(AsteroidsList.size() - asteroidsCounter) < 5 ?
+				int addNewAsteroids =(AsteroidsList.size() - asteroidsCounter) < 5?
 					(AsteroidsList.size() - asteroidsCounter) : 5;
 
 				//players need to know the number of gameObjects in each message
@@ -418,6 +421,7 @@ public:
 
 		}
 	}
+
 
 
 //Insert to MessageList---------------------
@@ -473,6 +477,12 @@ public:
 		std::to_string(number).size() + sizeof("\0") });
 	}
 
+	template<typename type>
+	void FrontInsert_Number_MessageList(MessageList& messageList, const type& number)
+	{
+		messageList.insert(messageList.begin(), {std::to_string(number).c_str(),
+		std::to_string(number).size() + sizeof("\0") });
+	}
 
 //Extract From MessageList---------------------
 

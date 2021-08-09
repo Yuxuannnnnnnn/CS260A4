@@ -101,7 +101,7 @@ public:
 	std::vector<gameObjectID> Create_Asteroids_DataInitialisation()
 	{
 		srand(time(NULL));
-		int numberOfAsteroids = (rand() % 1) + 10;
+		int numberOfAsteroids = (rand() % 1) + 20;
 
 		std::vector <gameObjectID> objectlist;
 		for (int i = 0; i < numberOfAsteroids; i++)

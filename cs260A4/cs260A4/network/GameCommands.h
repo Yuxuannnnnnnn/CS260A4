@@ -27,9 +27,7 @@ enum class GameCommands
 	// to send synchroise, send object ID, gameobject data
 
 	// to receive synchronse, send object ID, gameobject data
-	Synchronise_Asteroids,
 	Synchronise_Player,
-
 
 
 	MoveForward,
