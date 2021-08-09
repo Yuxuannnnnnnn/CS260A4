@@ -178,7 +178,7 @@ public:
 
 //--------------------Waiting for players to Join game------------------------------------
 
-	void Wait_ForAllPlayers()
+	void Wait_ForAllPlayers(const InputSystem& inputsystem)
 	{
 	//------------Wait for all Clients to connect----------------------
 
@@ -188,10 +188,19 @@ public:
 		_InsertNotification(GameCommands::JoinGame, {}, -1);
 
 		int count_players_in_game = 1; //count this client
+		std::vector<clientsAddressIndex> addressIndex;
 
 		//while the number of players in the game has not reached the requirement
 		while (count_players_in_game < _NumOfPlayersRequired)
 		{
+			if (inputsystem.KeyPressed(KEY::VK_A))
+			{
+				//Respond to the client an InGame notification
+				_InsertNotification(GameCommands::JoinGame, {}, -1);
+				std::cout << "SentJoinGame Mess." << std::endl;
+			}
+
+
 			//make sure the network System is not insert events to the list
 			//while logicSystem is accessing the eventsList
 			std::lock_guard<std::mutex> EventsListLock{ EventsList_Mutex };
@@ -232,15 +241,20 @@ public:
 					//Respond to the client an InGame notification
 					_InsertNotification(GameCommands::InGame, {}, clientAddrIndex);
 
-					PRINTOUT("ClientAddressIndex: "
-						, clientAddrIndex,
-						" has joined game.");
-					PRINTOUT("Player "
-						, count_players_in_game
-						, " has joined game.");
+					if (std::find(addressIndex.begin(), addressIndex.end(), clientAddrIndex) == addressIndex.end())
+					{
+						PRINTOUT("ClientAddressIndex: "
+							, clientAddrIndex,
+							" has joined game.");
+						PRINTOUT("Player "
+							, count_players_in_game
+							, " has joined game.");
 
-					//increment number of players in the game
-					count_players_in_game++;
+						addressIndex.push_back(clientAddrIndex);
+
+						//increment number of players in the game
+						count_players_in_game++;
+					}
 				}
 			}
 
