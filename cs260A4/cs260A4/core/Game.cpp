@@ -62,7 +62,7 @@ void Game::Run()
 #endif
 
 
-	_logicSystem.Wait_ForAllPlayers(_inputSystem);
+	_logicSystem.Wait_ForAllPlayers(_windowSystem, _inputSystem);
 	_logicSystem.HostInitGame();
 
 	while (GameIsRunning())

@@ -2,6 +2,7 @@
 
 #include "../input/InputSystem.h"
 #include "../input/KeyEnum.h"
+#include "../window/WindowSystem.h"
 #include <vector>
 #include <mutex>
 #include <functional>
@@ -178,7 +179,7 @@ public:
 
 //--------------------Waiting for players to Join game------------------------------------
 
-	void Wait_ForAllPlayers(const InputSystem& inputsystem)
+	void Wait_ForAllPlayers(WindowSystem& _windowSystem, InputSystem& inputsystem)
 	{
 	//------------Wait for all Clients to connect----------------------
 
@@ -193,6 +194,10 @@ public:
 		//while the number of players in the game has not reached the requirement
 		while (count_players_in_game < _NumOfPlayersRequired)
 		{
+			bool boolean;
+			_windowSystem.Update(boolean);
+			inputsystem.Update();						//get inputs
+
 			if (inputsystem.KeyPressed(KEY::VK_A))
 			{
 				//Respond to the client an InGame notification
