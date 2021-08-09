@@ -236,6 +236,8 @@ public:
 							, _playerID - 1
 							, " is in game.");
 
+						addressIndex.push_back(clientAddrIndex);
+
 						//increment number of players in the game
 						count_players_in_game++;
 					}
