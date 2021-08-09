@@ -24,6 +24,12 @@ enum class GameCommands
 	//Host will broadcast to all players the asteroids updated Details
 	SyncrhoniseAsteroids,
 
+	// to send synchroise, send object ID, gameobject data
+
+	// to receive synchronse, send object ID, gameobject data
+	Synchronise_Asteroids,
+	Synchronise_Player,
+
 
 
 	MoveForward,
@@ -34,7 +40,7 @@ enum class GameCommands
 
 
 	//For Logic System usage
-	SendAcceleration,
+
 
 	//For Lock-Step
 	

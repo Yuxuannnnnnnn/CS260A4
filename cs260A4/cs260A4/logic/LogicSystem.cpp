@@ -5,8 +5,11 @@
 #include "../network/GameCommands.h"
 #include <winsock.h>
 
+// macro to enable/disable synchroise
+#define SYNCHRO 1
 
-
+// number of frames between each synchronise gameobject 
+#define SYNCHRO_COUNT 10
 
 
 
@@ -43,6 +46,17 @@ void LogicSystem::Update(const InputSystem& inputsystem, float dt, float gametim
 
 		// broadcast this acceleration to all other client
 
+
+		DRData drdata{ accel.x, accel.y, gametime, _playerID };// playerID is the global ID 
+		MessageList messageList;
+		InsertDRData_MessageList(messageList, drdata);
+
+		// -1 is broadcast
+		_InsertNotification(GameCommands::MoveForward, { messageList }, -1);
+
+		ownship.rigidbody.velocity = ownship.rigidbody.velocity + accel;
+		// (from CS230) scale velocity by 0.99 to simulate drag and prevent velocity out of control
+		ownship.rigidbody.velocity = ownship.rigidbody.velocity * 0.99f;
 
 
 		// _playerID is the global player index
@@ -97,9 +111,11 @@ void LogicSystem::Update(const InputSystem& inputsystem, float dt, float gametim
 		ownship.transform.rotation += rotation_speed * dt;
 		ownship.transform.rotation = Wrap(ownship.transform.rotation, -PI, PI);
 
+		MessageList messageList;
+		Insert_Number_MessageList(messageList, ownship.transform.rotation);
 		// broadcast this acceleration to all other client
 		_InsertNotification(GameCommands::RotateLeft,
-			{ {(char*)&ownship.transform.rotation, sizeof(ownship.transform.rotation)} },
+			{ messageList },
 			-1);
 		// end broadcast
 	}
@@ -109,23 +125,66 @@ void LogicSystem::Update(const InputSystem& inputsystem, float dt, float gametim
 		ownship.transform.rotation -= rotation_speed * dt;
 		ownship.transform.rotation = Wrap(ownship.transform.rotation, -PI, PI);
 
+		MessageList messageList;
+		Insert_Number_MessageList(messageList, ownship.transform.rotation);
 		// broadcast this acceleration to all other client
-		_InsertNotification(GameCommands::RotateRight,
-			{ {(char*)&ownship.transform.rotation, sizeof(ownship.transform.rotation)} },
+		_InsertNotification(GameCommands::RotateLeft,
+			{ messageList },
 			-1);
+
+
 		// end broadcast
 	}
 
-	PullEvent(gametime, factory);
 
+#if SYNCHRO
 	_loopCounter++;
-	if (_loopCounter >= _synCount)
+	if (_loopCounter >= SYNCHRO_COUNT)
 	{
 		_loopCounter = 0;
-		SynchronisePosition();
+		SynchronisePosition(factory);
 	}
-}
+#endif
 
+	PullEvent(gametime, factory);
+}
+void LogicSystem::SynchronisePosition(Factory* factory)
+{
+
+	// synchro own ship gameobject
+	MessageList messageList;
+	GameObject object = factory->getOwnPlayer();
+	InsertGameObject_MessageList(messageList, object);
+
+	_InsertNotification(GameCommands::Synchronise_Player,
+		{ messageList },
+		-1);
+
+
+	// host synchro asteroid velocity and position
+	if (_isHost)
+	{
+		for (auto& pair : factory->gameObjects)
+		{
+			// check if object is asteriod
+			if (pair.second.obj_type == TYPE_ASTEROID)
+			{
+
+				MessageList messageList;
+				Insert_Number_MessageList(messageList, pair.first);
+				GameObject object = pair.second;
+				InsertGameObject_MessageList(messageList, object);
+
+				_InsertNotification(GameCommands::Synchronise_Asteroids,
+					{ messageList },
+					-1);
+			}
+		}
+	}
+
+	
+	// send a syn command, of player position, rotation, velocity
+}
 void LogicSystem::TestUpdate(const InputSystem& inputsystem, float dt, std::vector<GameObject>& gameobjlist)
 {
 
@@ -266,14 +325,7 @@ void LogicSystem::PullEvent(float currgametime, Factory* factory)
 			DRData drdata;
 			ExtractDRData_MessageList(0, messageList, drdata);
 			PerformDR(factory->getPlayer(drdata.playerindex), drdata, currgametime);
-			/*DRData drdata;
-			memcpy(&drdata, &(event.second[0]), sizeof(DRData));
-			drdata.accelx = ntohl(drdata.accelx);
-			drdata.accely = ntohl(drdata.accely);
-			drdata.gametime = ntohl(drdata.gametime);
-			drdata.playerindex = ntohl(drdata.playerindex);
 
-			PerformDR(factory->getPlayer(clientAddrIndex), drdata, currgametime);*/
 		}
 
 		else if (command == GameCommands::RotateLeft)
@@ -287,6 +339,28 @@ void LogicSystem::PullEvent(float currgametime, Factory* factory)
 			float receivedRotation;
 			Extract_Number_MessageList(0, messageList, receivedRotation);
 			factory->getPlayer(clientAddrIndex).transform.rotation = receivedRotation;
+		}
+		else if (command == GameCommands::Synchronise_Asteroids)
+		{
+			// extract gameobject ID
+			int gameObjectID = 0;
+			Extract_Number_MessageList(0, messageList, gameObjectID);
+
+			// extract gameobject 
+			GameObject object;
+			ExtractGameObject_MessageList(0, messageList, object);
+
+			// replace data with synchronised data
+			factory->gameObjects[gameObjectID] = object;
+		}
+		else if (command == GameCommands::Synchronise_Player)
+		{
+			GameObject object;
+			ExtractGameObject_MessageList(0, messageList, object);
+
+			GameObject& player_toSyn = factory->getGameObject(object.playerIndex);
+			player_toSyn = object;
+
 		}
 
 	}
@@ -332,11 +406,7 @@ void LogicSystem::PullEvent(float currgametime, Factory* factory)
 	//EventsList.clear();
 }
 
-void LogicSystem::SynchronisePosition()
-{
 
-	// send a syn command, of player position, rotation, velocity
-}
 
 void LogicSystem::PerformDR(GameObject& ship, const DRData& drdata, float currgametime)
 {

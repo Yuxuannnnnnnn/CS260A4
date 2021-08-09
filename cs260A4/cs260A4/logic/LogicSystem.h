@@ -496,7 +496,7 @@ private:
 	int _synCount = 10;
 
 	void PullEvent(float currgametime, Factory*);
-	void SynchronisePosition();
+	void SynchronisePosition(Factory*);
 	void PerformDR(GameObject& ship, const DRData& drdata, float currgametime);
 
 	float Wrap(float x, float x0, float x1);
