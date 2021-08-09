@@ -154,6 +154,27 @@ public:
 		return counterID - 1;
 	}
 
+	gameObjectID CreateBullet(const Vector2& position, float rotation, const Vector2& velocity)
+	{
+		
+		gameObjects[counterID] = GameObject{};
+
+		gameObjects[counterID].transform.position = position;
+		gameObjects[counterID].transform.scale = { 15.0f, 3.0f };
+		gameObjects[counterID].transform.rotation = rotation;
+
+		gameObjects[counterID].rigidbody.velocity = velocity;
+
+		gameObjects[counterID].mesh = MeshType::quad;
+		gameObjects[counterID].color = { 1.f, 0.f, 1.f };
+
+		gameObjects[counterID].obj_type = TYPE::TYPE_BULLET;
+
+		counterID++;
+
+		return counterID - 1;
+	}
+
 
 //----------------Functions For Systems to call---------------------------
 

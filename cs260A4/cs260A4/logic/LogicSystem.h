@@ -578,8 +578,11 @@ private:
 	void PullEvent(float currgametime, Factory*);
 	void SynchronisePosition(Factory*);
 	void PerformDR(GameObject& ship, const DRData& drdata, float currgametime);
+	bool CollisionIntersection(const AABBCollider& aabb1, const AABBCollider& aabb2);
+	void CheckCollision(Factory*);
 
 	float Wrap(float x, float x0, float x1);
 	float acceleration_speed = 40.0f;
 	float rotation_speed = 6.3f;
+	static constexpr float bulletspeed = 200.0f;
 };

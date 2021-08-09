@@ -6,7 +6,7 @@
 #include <winsock.h>
 
 // macro to enable/disable synchroise
-#define SYNCHRO 1
+#define SYNCHRO 0
 
 // number of frames between each synchronise gameobject 
 #define SYNCHRO_COUNT 360 // every 3 seconds
@@ -97,7 +97,7 @@ void LogicSystem::Update(const InputSystem& inputsystem, float dt, float gametim
 		InsertDRData_MessageList(messageList, drdata);
 
 		// -1 is broadcast
-		_InsertNotification(GameCommands::MoveForward, { messageList }, -1);
+		_InsertNotification(GameCommands::MoveBackward, { messageList }, -1);
 
 
 		ownship.rigidbody.velocity = ownship.rigidbody.velocity + accel;
@@ -136,6 +136,26 @@ void LogicSystem::Update(const InputSystem& inputsystem, float dt, float gametim
 		// end broadcast
 	}
 
+	if (inputsystem.KeyPressed(VK_SPACEBAR))
+	{
+		// spawn bullet
+		Vector2 bulletvelocity = { cosf(ownship.transform.rotation) * bulletspeed, sinf(ownship.transform.rotation) * bulletspeed };
+		factory->CreateBullet(ownship.transform.position, ownship.transform.rotation, bulletvelocity);
+
+		MessageList messageList;
+		Insert_Number_MessageList(messageList, ownship.transform.position.x);
+		Insert_Number_MessageList(messageList, ownship.transform.position.y);
+		Insert_Number_MessageList(messageList, ownship.transform.rotation);
+		Insert_Number_MessageList(messageList, bulletvelocity.x);
+		Insert_Number_MessageList(messageList, bulletvelocity.y);
+		_InsertNotification(GameCommands::Shoot,
+			{ messageList },
+			-1);
+
+
+	}
+
+	CheckCollision(factory);
 
 #if SYNCHRO
 	_loopCounter++;
@@ -362,6 +382,19 @@ void LogicSystem::PullEvent(float currgametime, Factory* factory)
 			player_toSyn = object;
 
 		}
+		else if (command == GameCommands::Shoot)
+		{
+			Vector2 position;
+			float rotation;
+			Vector2 velocity;
+
+			Extract_Number_MessageList(0, messageList, position.x);
+			Extract_Number_MessageList(0, messageList, position.y);
+			Extract_Number_MessageList(0, messageList, rotation);
+			Extract_Number_MessageList(0, messageList, velocity.x);
+			Extract_Number_MessageList(0, messageList, velocity.y);
+			factory->CreateBullet(position, rotation, velocity);
+		}
 
 	}
 	EventsList.clear();
@@ -439,4 +472,38 @@ float LogicSystem::Wrap(float x, float x0, float x1)
 		return x1 - range;
 	}
 	return x;
+}
+
+bool LogicSystem::CollisionIntersection(const AABBCollider& aabb1, const AABBCollider& aabb2)
+{
+	if (aabb1.max.x < aabb2.min.x || aabb1.min.x > aabb2.max.x)
+		return false;
+
+	if (aabb1.max.y < aabb2.min.y || aabb1.min.y > aabb2.max.y)
+		return false;
+
+	return true;
+}
+
+void LogicSystem::CheckCollision(Factory* factory)
+{
+	for (auto& pair : factory->gameObjects)
+	{
+		if (pair.second.obj_type == TYPE_ASTEROID)
+		{
+			for (auto& pair2 : factory->gameObjects)
+			{
+				if (pair2.second.obj_type == TYPE_BULLET)
+				{
+					bool isCollided = CollisionIntersection(pair.second.aabb, pair2.second.aabb);
+					if (isCollided)
+					{
+						factory->DeleteGameObjectID(pair.first);
+						factory->DeleteGameObjectID(pair2.first);
+					}
+				}
+			}
+		}
+
+	}
 }
