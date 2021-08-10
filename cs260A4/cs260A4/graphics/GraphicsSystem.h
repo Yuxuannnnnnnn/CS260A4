@@ -12,7 +12,7 @@ class GraphicsSystem
 	HDC windowDC{}; // global Window-device context
 	HGLRC wglDC{}; // OpenGL-device context
 
-	HWND _hwnd; //reference to the handle to the window
+	HWND _hwnd{}; //reference to the handle to the window
 
 
 
@@ -23,13 +23,13 @@ class GraphicsSystem
 
 	void RenderGameObject(GameObject& gameobj);
 
-	Shader _shader;
-	GLuint _vaotri;
-	GLuint _vaoquad;
-	GLuint _vbotri;
-	GLuint _vboquad;
+	Shader _shader{};
+	GLuint _vaotri{};
+	GLuint _vaoquad{};
+	GLuint _vbotri{};
+	GLuint _vboquad{};
 
-	glm::mat4 proj;
+	glm::mat4 proj{};
 	
 
 public:

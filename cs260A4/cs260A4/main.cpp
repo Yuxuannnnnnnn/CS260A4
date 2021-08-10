@@ -9,7 +9,7 @@
 //Wrapper to parse the commandline from the console
 #include "Tools/Console.h"
 
-#include "core/testgame.h"
+//#include "core/testgame.h"
 #include "core/GameObject.h"
 #include "physics/Transform.h"
 #include "physics/Rigidbody.h"

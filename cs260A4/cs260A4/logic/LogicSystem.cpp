@@ -10,7 +10,7 @@
 #define SYNCHRO 1
 
 // number of frames between each synchronise gameobject 
-#define SYNCHRO_COUNT 120 // every 2 seconds
+#define SYNCHRO_COUNT 4 // every 1 seconds
 
 
 
@@ -297,7 +297,7 @@ void LogicSystem::Update(const InputSystem& inputsystem, float dt, float gametim
 		/*std::cout << "Factory PID: " << factory->_playerID << ","
 				<< "SHIP PID: "  << ownship.playerIndex << std::endl;*/
 
-		if (inputsystem.KeyHold(VK_W) && wCoolDown < 1.0f)
+		if (inputsystem.KeyHold(VK_W) )
 		{
 
 			Vector2 accel{ cosf(ownship.transform.rotation) * acceleration_speed,
@@ -314,9 +314,14 @@ void LogicSystem::Update(const InputSystem& inputsystem, float dt, float gametim
 			MessageList messageList;
 			InsertDRData_MessageList(messageList, drdata);
 
-			// -1 is broadcast
-			_InsertNotification(GameCommands::MoveForward, { messageList }, -1);
-			wCoolDown = 3.0f;
+
+			if (wCoolDown < 1.0f / 60.0f)
+			{
+				// -1 is broadcast
+				_InsertNotification(GameCommands::MoveForward, { messageList }, -1);
+				wCoolDown = 2.0f;
+
+			}
 
 			ownship.rigidbody.velocity = ownship.rigidbody.velocity + accel * dt;
 			// (from CS230) scale velocity by 0.99 to simulate drag and prevent velocity out of control
@@ -326,7 +331,7 @@ void LogicSystem::Update(const InputSystem& inputsystem, float dt, float gametim
 
 		}
 
-		if (inputsystem.KeyHold(VK_S) && sCoolDown < 1.0f)
+		if (inputsystem.KeyHold(VK_S))
 		{
 			Vector2 accel{ cosf(ownship.transform.rotation) * -acceleration_speed * dt,
 								 sinf(ownship.transform.rotation) * -acceleration_speed * dt };
@@ -342,8 +347,12 @@ void LogicSystem::Update(const InputSystem& inputsystem, float dt, float gametim
 			InsertDRData_MessageList(messageList, drdata);
 
 			// -1 is broadcast
-			_InsertNotification(GameCommands::MoveBackward, { messageList }, -1);
-			sCoolDown = 3.0f;
+
+			if (wCoolDown < 1.0f/60.0f)
+			{
+				_InsertNotification(GameCommands::MoveBackward, { messageList }, -1);
+				sCoolDown = 2.0f;
+			}
 
 			ownship.rigidbody.velocity = ownship.rigidbody.velocity + accel * dt;
 
@@ -442,7 +451,7 @@ void LogicSystem::SynchronisePosition(Factory* factory)
 		for (auto& pair : factory->gameObjects)
 		{
 			// check if object is asteriod
-			if (pair.second.obj_type == TYPE_ASTEROID)
+			if (pair.second.obj_type == TYPE::TYPE_ASTEROID)
 			{
 				asteroidsCounter++;
 
@@ -544,7 +553,7 @@ void LogicSystem::TestUpdate(const InputSystem& inputsystem, float dt, std::vect
 				bullet.transform.position = gameobj.transform.position;
 				bullet.transform.rotation = gameobj.transform.rotation;
 				bullet.transform.scale = { 15.0f, 3.0f };
-				bullet.obj_type = TYPE_BULLET;
+				bullet.obj_type = TYPE::TYPE_BULLET;
 				bullet.rigidbody.velocity = { cosf(gameobj.transform.rotation) * bulletspeed, sinf(gameobj.transform.rotation) * bulletspeed };
 				gameobjlist.push_back(bullet);
 			}
@@ -596,7 +605,7 @@ void LogicSystem::PullEvent(float currgametime, Factory* factory)
 			//get number of GameObjects
 			int NumberOfGameObjects = 0;
 			Extract_Number_MessageList(0, messageList, NumberOfGameObjects);
-			for (size_t i = 0; i < NumberOfGameObjects; i++)
+			for (int i = 0; i < NumberOfGameObjects; i++)
 			{
 				int gameObjectID = 0;
 				Extract_Number_MessageList(i * 14 + 1, messageList, gameObjectID);
@@ -618,7 +627,7 @@ void LogicSystem::PullEvent(float currgametime, Factory* factory)
 			//get number of GameObjects
 			int NumberOfGameObjects = 0;
 			Extract_Number_MessageList(0, messageList, NumberOfGameObjects);
-			for (size_t i = 0; i < NumberOfGameObjects; i++)
+			for (int i = 0; i < NumberOfGameObjects; i++)
 			{
 				int gameObjectID = 0;
 				Extract_Number_MessageList(i * 14 + 1, messageList, gameObjectID);
@@ -793,11 +802,11 @@ void LogicSystem::CheckCollision(Factory* factory)
 {
 	for (auto& pair : factory->gameObjects)
 	{
-		if (pair.second.obj_type == TYPE_ASTEROID)
+		if (pair.second.obj_type == TYPE::TYPE_ASTEROID)
 		{
 			for (auto& pair2 : factory->gameObjects)
 			{
-				if (pair2.second.obj_type == TYPE_BULLET)
+				if (pair2.second.obj_type == TYPE::TYPE_BULLET)
 				{
 					bool isCollided = CollisionIntersection(pair.second.aabb, pair2.second.aabb);
 					if (isCollided)
