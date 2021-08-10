@@ -54,23 +54,20 @@ public:
 		playerID playerID)
 	{
 		_playerID = playerID;
-		
-		//create own ship - blue color
-		_playerObjectID = CreateShip(playerID, { 0.f, 0.f, 1.f });
 
-		playerObjectsList[playerID] = _playerObjectID;
-
-		std::array<Vector3, 3> colorList;
-		colorList[0] = { 1.0f, 0.f, 0.f };
-		colorList[1] = {0.f, 1.0f, 0.f};
-		colorList[2] = {1.0f, 1.0f, 0.f};
+		std::array<Vector3, 4> colorList;
+		colorList[0] = { 0.f, 0.f, 1.f };
+		colorList[1] = { 1.0f, 0.f, 0.f };
+		colorList[2] = {0.f, 1.0f, 0.f};
+		colorList[3] = {1.0f, 1.0f, 0.f};
 
 		for (size_t i = 0; i < numberOfPlayers; i++)
 		{
-			//create all other clients ship & assign the indices to them
-			if (playerID != i)
+			//create all ship & assign the indices to them
+			playerObjectsList[i] = CreateShip(i, colorList[i]);
+			if (playerID == i)
 			{
-				playerObjectsList[i] =  CreateShip(i, colorList[i-1]);
+				_playerObjectID = playerObjectsList[i];
 			}
 		}
 
