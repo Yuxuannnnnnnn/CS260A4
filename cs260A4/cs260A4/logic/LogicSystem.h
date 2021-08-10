@@ -470,8 +470,8 @@ private:
 	float rotation_speed = 6.3f;
 	static constexpr float bulletspeed = 200.0f;
 
-	float wCoolDown;
-	float sCoolDown;
+	float wCoolDown{0.0f};
+	float sCoolDown{0.0f};
 };
 
 
