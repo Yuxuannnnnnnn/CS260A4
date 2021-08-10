@@ -1,5 +1,11 @@
 #pragma once
 
+
+
+#ifndef WINDOWSSYSTEM
+#define WINDOWSSYSTEM
+
+
 #include <Windows.h>
 #include "../framework.h"
 #include "../Resource.h"
@@ -26,3 +32,6 @@ private:
 };
 
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
+
+
+#endif

@@ -1,5 +1,9 @@
 #pragma once
 
+#ifndef GAMECOMMANDS
+#define GAMECOMMANDS
+
+
 
 enum class GameCommands
 {
@@ -65,3 +69,4 @@ enum class GameCommands
 
 };
 
+#endif

@@ -3,8 +3,8 @@
 #include "../core/GameObject.h"
 #include "../physics/Vector2.h"
 #include "../network/GameCommands.h"
-#include <winsock.h>
-#include "../Tools/EngineSettings.h"
+
+#include "../window/WindowSystem.h"
 
 // macro to enable/disable synchroise
 #define SYNCHRO 1
@@ -14,9 +14,229 @@
 
 
 
+
+void LogicSystem::GameMenu(NetworkSystem* networkSystem)
+{
+	PRINTOUT("-----------------GameMenu-------------------");
+	PRINTOUT("1. Press J to Join Game");
+	PRINTOUT("2. Press G to Create GameRoom");
+	PRINTOUT("\0");
+
+	while (true)
+	{
+		std::string userInput;
+
+		
+		std::cout << userInput << std::endl;
+		//join a game
+		if (!userInput.compare("J"))
+		{
+			PRINTOUT("Key In Host Hostname:Port: ");
+
+			//get Hostname:Port from commandline console
+			std::getline(std::cin, userInput);
+
+			//checkUser_HostnamePort
+			auto position = userInput.find(":");
+			std::string hostName = userInput.substr(0, position);
+			std::string Port = userInput.substr(position + 1);
+
+
+			//can find the hostName & Port from the commandline
+			//get the clientAddrIndex of the host
+			if (networkSystem->checkUser_HostnamePort(hostName, Port, hostAddrIndex))
+			{
+				PRINTOUT("Joining Game...");
+				_isHost = false;
+
+				break;
+			}
+			else //cannot find the hostName & Port from the commandline
+			{
+				PRINTOUT("Invalid Hostname:Port! Please key in  Hostname:Port Again", "\0");
+			}
+		}
+		//Create a game
+		else if (!userInput.compare("G"))
+		{
+			PRINTOUT("Press G to Create GameRoom:");
+			//this player is the host
+			_isHost = true;
+
+			break;
+
+		}
+		else
+		{
+			PRINTOUT("Invalid Command! Please key in Command Again", "\0");
+		}
+	}
+}
+
+void LogicSystem::Wait_ForAllPlayers(WindowSystem& _windowSystem, InputSystem& inputsystem)
+{
+	//------------Wait for all Clients to connect----------------------
+
+		//send a packet to all players that this client has just joinedGame
+		//all players who received this message should know
+		//this player's sockaddr
+	_InsertNotification(GameCommands::JoinGame, {}, -1);
+
+	int count_players_in_game = 1; //count this client
+	std::vector<clientsAddressIndex> addressIndex;
+
+
+	//while the number of players in the game has not reached the requirement
+	while (count_players_in_game < _NumOfPlayersRequired)
+	{
+		bool boolean;
+		_windowSystem.Update(boolean);
+		inputsystem.Update();						//get inputs
+
+		if (inputsystem.KeyPressed(KEY::VK_A))
+		{
+			//Respond to the client an InGame notification
+			_InsertNotification(GameCommands::JoinGame, {}, -1);
+			PRINTOUT("SentJoinGame Mess.");
+		}
+
+
+		//make sure the network System is not insert events to the list
+		//while logicSystem is accessing the eventsList
+		std::lock_guard<std::mutex> EventsListLock{ EventsList_Mutex };
+		for (int i = 0; i < EventsList.size(); i++)
+		{
+			auto& events = EventsList[i];
+			clientsAddressIndex clientAddrIndex = events.first;
+			Event event = events.second;
+			GameCommands command = event.first;
+
+			//wait for clients to respond that they are already inGame
+			if (command == GameCommands::InGame)
+			{
+				//add this event to be deleted
+				EventsDeletionList.push_back(i);
+
+				if (std::find(addressIndex.begin(), addressIndex.end(), clientAddrIndex) == addressIndex.end())
+				{
+					//count the number of players already in the game
+					//so that I can assign a playerID to myself at the end
+					++_playerID;
+
+
+					PRINTOUT("ClientAddressIndex: "
+						, clientAddrIndex
+						, " is in game.");
+					PRINTOUT("Player "
+						, _playerID - 1
+						, " is in game.");
+
+					addressIndex.push_back(clientAddrIndex);
+
+					//increment number of players in the game
+					count_players_in_game++;
+				}
+			}
+			//if clients never respond, then wait for them to send a joinedGame notification
+			else if (command == GameCommands::JoinGame)
+			{
+				//add this event to be deleted
+				EventsDeletionList.push_back(i);
+
+				if (std::find(addressIndex.begin(), addressIndex.end(), clientAddrIndex) == addressIndex.end())
+				{
+					//Respond to the client an InGame notification
+					_InsertNotification(GameCommands::InGame, {}, clientAddrIndex);
+
+					PRINTOUT("ClientAddressIndex: "
+						, clientAddrIndex,
+						" has joined game.");
+					PRINTOUT("Player "
+						, count_players_in_game
+						, " has joined game.");
+
+					addressIndex.push_back(clientAddrIndex);
+
+					//increment number of players in the game
+					count_players_in_game++;
+				}
+			}
+		}
+
+
+		clearEventsToBeDeleted();
+	}
+
+
+	//---------------All clients have connected from this point----------------------
+
+		//if the playerID of this client is 0
+		//then this client will be the host
+		//that define the settings of the asteroids throughout the game& 
+		//and the initial settings of all the player ships
+	if (_playerID == 0)
+	{
+		HostPlayer(true);
+	}
+
+
+	//broadcast to everyone their player Index
+	_InsertNotification(
+		GameCommands::SendIndex, { {(char*)&_playerID, sizeof(_playerID)} }, -1);
+
+
+
+	int countPlayersSentIndex = 1; //count this client
+	//find out each player's playerID
+	//match each player's playerID to their clientAddres
+	while (countPlayersSentIndex < _NumOfPlayersRequired)
+	{
+		//make sure the network System is not insert events to the list
+		//while logicSystem is accessing the eventsList
+		std::lock_guard<std::mutex> EventsListLock{ EventsList_Mutex };
+		for (int i = 0; i < EventsList.size(); i++)
+		{
+			auto& events = EventsList[i];
+			clientsAddressIndex clientAddrIndex = events.first;
+			Event event = events.second;
+			GameCommands command = event.first;
+			MessageList messageList = event.second;
+
+			//wait for clients to respond their clientsAddressIndex
+			if (command == GameCommands::SendIndex)
+			{
+				EventsDeletionList.push_back(i);
+
+				//extract playerID
+				int playerID = -1;
+				memcpy(&playerID, messageList[0].message, messageList[0].size_);
+
+				//store playerID with reference to their clientAddressID
+				clientAddrID_PlayerID_List[clientAddrIndex] = playerID;
+
+				//increment number of players that has made their playerID known
+				countPlayersSentIndex++;
+			}
+		}
+		clearEventsToBeDeleted();
+
+	}
+
+	//let factory know yr playerID
+	gameFactory->_playerID = _playerID;
+
+
+
+	//--------All clients have made known their playerID to every client at this point----------
+
+
+}
+
+
+
 void LogicSystem::Update(const InputSystem& inputsystem, float dt, float gametime, Factory* factory)
 {
-		PullEvent(gametime, factory);
+	PullEvent(gametime, factory);
 
 
 	// get the reference of Ship belong to this client

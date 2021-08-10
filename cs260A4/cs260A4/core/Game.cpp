@@ -18,8 +18,9 @@ Game::Game(HINSTANCE hinstance, int nCmdShow, unsigned width, unsigned height,
 
 	_logicSystem = new LogicSystem{};
 
+	_networkSystem = new NetworkSystem{};
 
-	_networkSystem.Init(
+	_networkSystem->Init(
 		list,
 		std::bind(&LogicSystem::InsertEvent, 
 		_logicSystem, 
@@ -30,7 +31,7 @@ Game::Game(HINSTANCE hinstance, int nCmdShow, unsigned width, unsigned height,
 	_logicSystem->Init(
 		_factory,
 		std::bind(&NetworkSystem::InsertNotification,
-			&_networkSystem,
+			_networkSystem,
 			std::placeholders::_1,
 			std::placeholders::_2, 
 			std::placeholders::_3), 
@@ -60,11 +61,11 @@ void Game::Run()
 	//from each address
 	std::thread NetworkSystem_Thread{
 			&NetworkSystem::ReceiveEventsFromClient,
-			std::ref(_networkSystem), _logicSystem };
+			std::ref(*_networkSystem), _logicSystem };
 
 #endif
 
-
+	//_logicSystem->GameMenu(_networkSystem);
 	_logicSystem->Wait_ForAllPlayers(_windowSystem, _inputSystem);
 	_logicSystem->HostInitGame();
 

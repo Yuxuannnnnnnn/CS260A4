@@ -2,6 +2,10 @@
 #include <iostream>			// cout, cerr
 
 
+
+#ifndef MESSAGE
+#define MESSAGE
+
 #define MESSAGE_MAX_BUFEFR 1024
 
 class Message
@@ -60,3 +64,6 @@ public:
 
 
 };
+
+
+#endif
