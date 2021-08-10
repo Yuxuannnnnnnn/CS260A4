@@ -417,11 +417,17 @@ void LogicSystem::PullEvent(float currgametime, Factory* factory)
 			Vector2 velocity;
 
 			Extract_Number_MessageList(0, messageList, position.x);
-			Extract_Number_MessageList(0, messageList, position.y);
-			Extract_Number_MessageList(0, messageList, rotation);
-			Extract_Number_MessageList(0, messageList, velocity.x);
-			Extract_Number_MessageList(0, messageList, velocity.y);
+			Extract_Number_MessageList(1, messageList, position.y);
+			Extract_Number_MessageList(2, messageList, rotation);
+			Extract_Number_MessageList(3, messageList, velocity.x);
+			Extract_Number_MessageList(4, messageList, velocity.y);
 			factory->CreateBullet(position, rotation, velocity);
+		}
+		else if (command == GameCommands::DestroyObject)
+		{
+			int ID;
+			Extract_Number_MessageList(0, messageList, ID);
+			factory->DeleteGameObjectID(ID);
 		}
 
 	}
@@ -528,17 +534,31 @@ void LogicSystem::CheckCollision(Factory* factory)
 					{
 						factory->DeleteGameObjectID(pair.first);
 						factory->DeleteGameObjectID(pair2.first);
+
+						MessageList messageList;
+
+						Insert_Number_MessageList(messageList, pair.first);
+						_InsertNotification(GameCommands::DestroyObject, messageList, -1);
+
+
+						messageList.clear();
+
+						Insert_Number_MessageList(messageList, pair2.first);
+						_InsertNotification(GameCommands::DestroyObject, messageList, -1);
+
 					}
 				}
 
-				else if (pair2.second.obj_type == TYPE_PLAYER)
+				// collision of asteriod and player
+
+				/*else if (pair2.second.obj_type == TYPE_PLAYER)
 				{
 					bool isCollided = CollisionIntersection(pair.second.aabb, pair2.second.aabb);
 					if (isCollided)
 					{
 						factory->DeleteGameObjectID(pair2.first);
 					}
-				}
+				}*/
 
 			}
 		}

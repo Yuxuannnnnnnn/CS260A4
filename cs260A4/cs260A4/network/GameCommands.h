@@ -38,7 +38,7 @@ enum class GameCommands
 
 
 	//For Logic System usage
-	DeleteAsteriod,
+	DestroyObject,
 	PlayerDied,
 
 	//For Lock-Step
