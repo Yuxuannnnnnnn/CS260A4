@@ -2,6 +2,12 @@
 #include "../framework.h"
 #include  <stdio.h>
 
+
+
+#ifndef CONSOLE
+#define CONSOLE
+
+
 class Console
 {
 public:
@@ -21,6 +27,9 @@ public:
 			freopen_s(&file, "CONOUT$", "wt", stdin);
 
 			SetConsoleTitle(L"Networking Game Console");
+
+
+		  
 		}
 	}
 #else //not debug mode
@@ -32,3 +41,6 @@ public:
 
 #endif
 };
+
+
+#endif

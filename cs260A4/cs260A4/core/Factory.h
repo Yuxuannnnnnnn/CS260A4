@@ -151,7 +151,8 @@ public:
 		return counterID - 1;
 	}
 	                           
-	gameObjectID CreateBullet(const Vector2& position, float rotation, const Vector2& velocity, int playerindex)
+	gameObjectID CreateBullet(const Vector2& position, 
+		float rotation, const Vector2& velocity, int playerindex)
 	{
 		
 		gameObjects[counterID] = GameObject{};

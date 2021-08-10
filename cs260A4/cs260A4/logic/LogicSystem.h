@@ -1,22 +1,30 @@
 #pragma once
 
+
+#ifndef LOGICSYSTEM
+#define LOGICSYSTEM
+
+
 #include "../input/InputSystem.h"
 #include "../input/KeyEnum.h"
-#include "../window/WindowSystem.h"
+#include "DRData.h"
+#include "../core/GameObject.h"
+
 #include <vector>
 #include <mutex>
 #include <functional>
 #include <string>
+#include <sstream>
 #include <map>
-#include "DRData.h"
-#include "../core/GameObject.h"
 #include <algorithm>
+
 
 #include <typeinfo> //For typeid() function
 
 //for gameObjects creation 
 //store factory pointer in LogicSystem
 #include "../core/Factory.h"
+#include "../core/Game.h"
 
 //for event
 #include "../network/MessageFormat.h"
@@ -29,6 +37,9 @@
 
 #define PI 3.1415926f
 
+
+
+class WindowsSystem;
 
 class LogicSystem
 {
@@ -76,6 +87,8 @@ public:
 	//stores the map to get the playerIndex from the clientsAddressIndex
 	typedef int playerID;
 	std::unordered_map<clientsAddressIndex, playerID> clientAddrID_PlayerID_List;
+	//get the clientAddrIndex of the host
+	clientsAddressIndex hostAddrIndex;
 
 
 	//boolean for whether this player is a host
@@ -84,8 +97,10 @@ public:
 	//and the initial settings of all the player ships
 	bool _isHost{ false };
 
+
+
 	//Own player ID
-	playerID _playerID{0};
+	playerID _playerID{ 0 };
 
 	//store factory - for game objects creation
 	Factory* gameFactory;
@@ -180,158 +195,12 @@ public:
 
 //--------------------Waiting for players to Join game------------------------------------
 
-	void Wait_ForAllPlayers(WindowSystem& _windowSystem, InputSystem& inputsystem)
-	{
-	//------------Wait for all Clients to connect----------------------
-
-		//send a packet to all players that this client has just joinedGame
-		//all players who received this message should know
-		//this player's sockaddr
-		_InsertNotification(GameCommands::JoinGame, {}, -1);
-
-		int count_players_in_game = 1; //count this client
-		std::vector<clientsAddressIndex> addressIndex;
-
-		//while the number of players in the game has not reached the requirement
-		while (count_players_in_game < _NumOfPlayersRequired)
-		{
-			bool boolean;
-			_windowSystem.Update(boolean);
-			inputsystem.Update();						//get inputs
-
-			if (inputsystem.KeyPressed(KEY::VK_A))
-			{
-				//Respond to the client an InGame notification
-				_InsertNotification(GameCommands::JoinGame, {}, -1);
-				PRINTOUT("SentJoinGame Mess.");
-			}
+	void GameMenu(NetworkSystem* networkSystem);
 
 
-			//make sure the network System is not insert events to the list
-			//while logicSystem is accessing the eventsList
-			std::lock_guard<std::mutex> EventsListLock{ EventsList_Mutex };
-			for(int i = 0; i < EventsList.size(); i++)
-			{
-				auto& events = EventsList[i];
-				clientsAddressIndex clientAddrIndex = events.first;
-				Event event = events.second;
-				GameCommands command = event.first;
 
-				//wait for clients to respond that they are already inGame
-				if (command == GameCommands::InGame)
-				{
-					//add this event to be deleted
-					EventsDeletionList.push_back(i);
-
-					if (std::find(addressIndex.begin(), addressIndex.end(), clientAddrIndex) == addressIndex.end())
-					{
-						//count the number of players already in the game
-						//so that I can assign a playerID to myself at the end
-						++_playerID;
-
-
-						PRINTOUT("ClientAddressIndex: "
-							, clientAddrIndex
-							, " is in game.");
-						PRINTOUT("Player "
-							, _playerID - 1
-							, " is in game.");
-
-						addressIndex.push_back(clientAddrIndex);
-
-						//increment number of players in the game
-						count_players_in_game++;
-					}
-				}
-				//if clients never respond, then wait for them to send a joinedGame notification
-				else if (command == GameCommands::JoinGame)
-				{
-					//add this event to be deleted
-					EventsDeletionList.push_back(i);
-
-					if (std::find(addressIndex.begin(), addressIndex.end(), clientAddrIndex) == addressIndex.end())
-					{
-						//Respond to the client an InGame notification
-						_InsertNotification(GameCommands::InGame, {}, clientAddrIndex);
-
-						PRINTOUT("ClientAddressIndex: "
-							, clientAddrIndex,
-							" has joined game.");
-						PRINTOUT("Player "
-							, count_players_in_game
-							, " has joined game.");
-
-						addressIndex.push_back(clientAddrIndex);
-
-						//increment number of players in the game
-						count_players_in_game++;
-					}
-				}
-			}
-
-
-			clearEventsToBeDeleted();
-		}
-
-		//if the playerID of this client is 0
-		//then this client will be the host
-		//that define the settings of the asteroids throughout the game& 
-		//and the initial settings of all the player ships
-		if (_playerID == 0)
-		{
-			HostPlayer(true);
-		}
-
-	//---------------All clients have connected from this point----------------------
-		//let factory know yr playerID
-		gameFactory->_playerID = _playerID;
-
-
-		//broadcast to everyone, my player Index
-		_InsertNotification(
-			GameCommands::SendIndex, { {(char*)&_playerID, sizeof(_playerID)} }, -1);
-
-
-		int countPlayersSentIndex = 1; //count this client
-		//find out each player's playerID
-		//match each player's playerID to their clientAddres
-		while (countPlayersSentIndex < _NumOfPlayersRequired)
-		{
-			//make sure the network System is not insert events to the list
-			//while logicSystem is accessing the eventsList
-			std::lock_guard<std::mutex> EventsListLock{ EventsList_Mutex };
-			for (int i = 0; i < EventsList.size(); i++)
-			{
-				auto& events = EventsList[i];
-				clientsAddressIndex clientAddrIndex = events.first;
-				Event event = events.second;
-				GameCommands command = event.first;
-				MessageList messageList = event.second;
-
-				//wait for clients to respond their clientsAddressIndex
-				if (command == GameCommands::SendIndex)
-				{
-					EventsDeletionList.push_back(i);
-
-					//extract playerID
-					int playerID = -1;
-					memcpy(&playerID, messageList[0].message, messageList[0].size_);
-
-					//store playerID with reference to their clientAddressID
-					clientAddrID_PlayerID_List[clientAddrIndex] = playerID;
-
-					//increment number of players that has made their playerID known
-					countPlayersSentIndex++;
-				}
-			}
-			clearEventsToBeDeleted();
-
-		}
-
-	//--------All clients have made known their playerID to every client at this point----------
-
-
-	}
+	void Wait_ForAllPlayers(WindowSystem& _windowSystem,
+		InputSystem& inputsystem);
 
 
 	void clearEventsToBeDeleted()
@@ -364,7 +233,7 @@ public:
 		{
 			MessageList messageList;
 
-			auto ShipList = 
+			auto& ShipList = 
 				gameFactory->Create_playerShips_DataInitialisation(
 				_NumOfPlayersRequired,
 				_playerID);
@@ -601,3 +470,8 @@ private:
 	float rotation_speed = 6.3f;
 	static constexpr float bulletspeed = 200.0f;
 };
+
+
+
+
+#endif

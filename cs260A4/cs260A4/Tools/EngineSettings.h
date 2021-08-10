@@ -2,9 +2,9 @@
 #include <iostream>
 
 
+
 #ifndef ENGINE_SETTINGS
 #define ENGINE_SETTINGS
-
 
 
 //define debug mode
@@ -17,6 +17,7 @@
 
 #define ASSERT(arg)    printf(arg)
 
+
 static std::mutex StdCout_Mutex;
 
 template<typename Arg, typename... Args>
@@ -28,6 +29,8 @@ static void PRINTOUT(Arg arg, Args... args)
 	((std::cout << std::forward<Args>(args)), ...);
 	std::cout << std::endl;
 }
+
+
 
 #else
 

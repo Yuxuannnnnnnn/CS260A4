@@ -16,7 +16,6 @@ the Client Socket.
 #ifndef CLIENT_UDP_SOCKET
 #define CLIENT_UDP_SOCKET
 
-
 //Tell the Visual Studio linker to include the following library in linking.
  //Alternatively, we could add this file to the linker command-line parameters, 
  // but including it in the source code simplifies the configuration.
@@ -31,7 +30,6 @@ the Client Socket.
 #include "ws2tcpip.h"		// getaddrinfo()
 #include "Windows.h"		// Entire Win32 API...
 #endif
-
 
 
 #include <iostream>			// cout, cerr
@@ -69,10 +67,16 @@ public:
 	//To, send data to               
 			// - max is 1 address at a time
 	//and also to, receive data from 
-			//- can have any amount of address at a time
+			// - can have any amount of address at a time
 	typedef int Index;  //just an integer to keep track 
 	Index AddressIndex{ 0 }; //increments when a new address is added
 	std::unordered_map<Index, sockaddr> Index_Addresses;
+
+	//stores the index mapped to the hostNameString & PortString
+	typedef std::string PortString;
+	typedef std::string HostNameString;
+	std::unordered_map<Index, 
+		std::pair<PortString, HostNameString>> Index_HostnamePort_List;
 
 
 	//address to send broadcast
@@ -165,6 +169,29 @@ public:
 		}
 
 		return -1;
+	}
+
+
+	bool check_HostnamePort_Exist(const std::string& hostName, 
+		const std::string& Port, 
+		int& clientAddrIndex)
+	{
+		for (auto& pair : Index_HostnamePort_List)
+		{
+			Index index = pair.first;
+			auto& HostPort = pair.second;
+			std::string& hostname = HostPort.first;
+			std::string& port = HostPort.second;
+
+			//found the hostname and port number
+			if ((hostName.compare(hostname) == 0) && (port.compare(Port) == 0))
+			{
+				clientAddrIndex = index;
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 
@@ -371,7 +398,8 @@ public:
 		return true;
 	}
 
-
+	//returns an ip address
+	//need to delete the ip address buffer after use
 	char*  print_ipv4(struct sockaddr* s, uint16_t& port)
 	{
 		struct sockaddr_in* sin = (struct sockaddr_in*)s;

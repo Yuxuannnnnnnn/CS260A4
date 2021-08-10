@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../network/NetworkSystem.h"
-
 #include "../input/InputSystem.h"
 #include "../window/WindowSystem.h"
 #include "../physics/PhysicSystem.h"
@@ -11,7 +10,8 @@
 #include "../Tools/CommandLine_Parser.h"
 #include "Factory.h"
 
-#include <Windows.h>
+
+
 
 
 class Game
@@ -29,6 +29,8 @@ public:
 
 
 private:
+
+
 	InputSystem _inputSystem;
 	WindowSystem _windowSystem;
 	PhysicSystem _physicSystem;
@@ -39,7 +41,7 @@ private:
 //the network system runs multiple threads
 //to receive packets from socket 
 //from each address
-	NetworkSystem _networkSystem;
+	NetworkSystem * _networkSystem;
 
 	Timer _gametime;
 	Timer _dt;

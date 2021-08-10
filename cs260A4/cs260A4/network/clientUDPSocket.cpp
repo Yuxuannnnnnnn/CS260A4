@@ -213,6 +213,7 @@ int clientUDPSocket::Get_Store_ClientAddress(
 
     //Store the client address by index
     Index_Addresses[clientIndex] = *serverInfo->ai_addr;
+    Index_HostnamePort_List[clientIndex] = { clientPortString , clientHostNameString };
 
 
     char buffer[100] = "\0";
