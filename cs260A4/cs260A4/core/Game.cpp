@@ -105,3 +105,11 @@ void Game::Run()
 	NetworkSystem_Thread.join();
 }
 
+Game::~Game()
+{
+
+	delete _factory;
+	delete _logicSystem;
+	delete _networkSystem;
+}
+

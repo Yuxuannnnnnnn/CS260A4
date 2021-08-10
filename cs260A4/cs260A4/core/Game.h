@@ -27,6 +27,9 @@ public:
 
 	void Run();
 
+	~Game();
+
+
 
 private:
 
@@ -42,6 +45,8 @@ private:
 //to receive packets from socket 
 //from each address
 	NetworkSystem * _networkSystem;
+
+
 
 	Timer _gametime;
 	Timer _dt;

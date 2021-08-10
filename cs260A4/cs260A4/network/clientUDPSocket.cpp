@@ -232,6 +232,8 @@ int clientUDPSocket::Get_Store_ClientAddress(
    auto ip =  print_ipv4(&Index_Addresses[clientIndex], port);
    PRINTOUT("host port: ", port, " ip: ", ip, "\n");
 
+   delete[] ip;
+
     //the addrinfo is no longer needed thus free the info
     freeaddrinfo(serverInfo);
 
