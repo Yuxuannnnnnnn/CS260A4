@@ -241,6 +241,27 @@ void LogicSystem::Update(const InputSystem& inputsystem, float dt, float gametim
 {
 	PullEvent(gametime, factory);
 
+	if (_islocking)
+	{
+		_waitingTime += dt;
+		if (_waitingTime >= locksteptime)
+		{
+			// wait till everyone ready
+
+	// annouce action
+
+	// send actual thing
+			MessageList messageList;
+			Insert_Number_MessageList(messageList, _playerID);
+			//Insert_Number_MessageList(messageList, storedCommand);
+
+			_InsertNotification(GameCommands::ReplyLockStep, messageList, -1);
+
+
+			_islocking = false;
+		}
+	}
+
 
 	// get the reference of Ship belong to this client
 	GameObject& ownship = factory->getOwnPlayer();
@@ -282,7 +303,7 @@ void LogicSystem::Update(const InputSystem& inputsystem, float dt, float gametim
 			Vector2 accel{ cosf(ownship.transform.rotation) * acceleration_speed,
 								 sinf(ownship.transform.rotation) * acceleration_speed };
 
-			
+
 
 			factory->getOwnPlayer().rigidbody.acceleration = accel;
 
@@ -378,6 +399,9 @@ void LogicSystem::Update(const InputSystem& inputsystem, float dt, float gametim
 				-1);
 
 		}
+
+
+
 		if (_isHost)
 		{
 			CheckCollision(factory);
@@ -544,20 +568,6 @@ void LogicSystem::Lock_Step(GameCommands gamecommands)
 
 	_islocking = true;
 
-	// get everyone else commitments ( other people also broadcasting)
-
-	// wait till everyone ready
-
-	// annouce action
-
-	// send actual thing
-	messageList.clear();
-	Insert_Number_MessageList(messageList, _playerID);
-	//Insert_Number_MessageList(messageList, gamecommands);
-
-	_InsertNotification(GameCommands::InitLockStep, messageList, -1);
-
-	// validate action
 
 
 }
@@ -703,6 +713,30 @@ void LogicSystem::PullEvent(float currgametime, Factory* factory)
 				_score += asteriod_reward;
 				std::cout << "New Score : " << _score << std::endl;
 			}
+		}
+		else if (command == GameCommands::InitLockStep)
+		{
+			_islocking = true;
+			int playerint;
+			Extract_Number_MessageList(0, messageList, playerint);
+			size_t hashvalue = 0;
+			Extract_Number_MessageList(1, messageList, hashvalue);
+
+			lockSteps[playerint].storedHashValue = hashvalue;
+		}
+		else if (command == GameCommands::ReplyLockStep)
+		{
+
+			// validate
+			// step
+			_islocking = false;
+			int playerint;
+			Extract_Number_MessageList(0, messageList, playerint);
+			GameCommands gameCommands = GameCommands::RotateLeft;
+			//Extract_Number_MessageList(1, messageList, gameCommands);
+
+			lockSteps[playerint].storedCommand = gameCommands;
+
 		}
 	}
 	EventsList.clear();

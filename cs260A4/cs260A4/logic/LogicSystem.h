@@ -38,7 +38,12 @@
 #define PI 3.1415926f
 
 
-
+struct Lock_Step_Struct
+{
+	int playerIndex;
+	size_t storedHashValue;
+	GameCommands storedCommand;
+};
 class WindowsSystem;
 
 class LogicSystem
@@ -123,6 +128,7 @@ public:
 	// wait till everyone ready
 	bool _islocking;
 	float _waitingTime = 0;
+	static constexpr float locksteptime = 0.3f;
 
 	// use key from keybind.cfg file
 	bool _useCustKey = false;
@@ -140,6 +146,12 @@ public:
 		const InsertNotificationFunction& InsertNotification, 
 		int NumOfPlayersRequired, bool useCustKey)
 	{
+
+		for (int i = 0; i < 4; ++i)
+		{
+			lockSteps[i].playerIndex = i;
+		}
+
 		//get function to insert notification to networkSystem
 		_InsertNotification = InsertNotification;
 
@@ -472,6 +484,13 @@ private:
 
 	float wCoolDown;
 	float sCoolDown;
+
+	size_t storedHashValue;
+	GameCommands storedCommand;
+ 
+
+	Lock_Step_Struct lockSteps[4];
+
 };
 
 
