@@ -40,6 +40,9 @@ void LogicSystem::Update(const InputSystem& inputsystem, float dt, float gametim
 
 	if (ownship.playerIndex >= 0)
 	{
+		std::cout << "Factory PID: " << factory->_playerID << ","
+				<< "SHIP PID: "  << ownship.playerIndex << std::endl;
+
 		if (inputsystem.KeyHold(VK_W))
 		{
 			Vector2 accel{ cosf(ownship.transform.rotation) * acceleration_speed * dt,
