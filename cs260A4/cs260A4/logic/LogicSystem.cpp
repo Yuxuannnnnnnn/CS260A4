@@ -574,6 +574,7 @@ void LogicSystem::PullEvent(float currgametime, Factory* factory)
 					factory->_playerObjectID = gameObjectID;
 			}
 
+
 		}
 		else if (command == GameCommands::SyncrhoniseAsteroids)
 		{
@@ -589,6 +590,7 @@ void LogicSystem::PullEvent(float currgametime, Factory* factory)
 				ExtractGameObject_MessageList(i * 14 + 2, messageList, object);
 				factory->insertGameObject(gameObjectID, object);
 			}
+
 		}
 		// when player move forward
 		else if (command == GameCommands::MoveForward)

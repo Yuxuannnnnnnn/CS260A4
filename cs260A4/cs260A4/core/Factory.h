@@ -184,6 +184,9 @@ public:
 
 	void insertGameObject(gameObjectID id, const GameObject& gameObject)
 	{
+		if (gameObjects.find(id) == gameObjects.end())
+			counterID++;
+
 		gameObjects[id] = gameObject;
 	}
 
