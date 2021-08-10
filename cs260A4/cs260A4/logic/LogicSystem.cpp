@@ -5,7 +5,7 @@
 #include "../network/GameCommands.h"
 
 #include "../window/WindowSystem.h"
-
+#include <functional>
 // macro to enable/disable synchroise
 #define SYNCHRO 1
 
@@ -523,9 +523,17 @@ void LogicSystem::TestUpdate(const InputSystem& inputsystem, float dt, std::vect
 
 void LogicSystem::Lock_Step(GameCommands gamecommands)
 {
-	committment = Hash(gamecommands);
+	size_t hash_value = Hash(gamecommands);
 
+	
 	// broadcast the commitment
+	MessageList messageList;
+	Insert_Number_MessageList(messageList, _playerID);
+	Insert_Number_MessageList(messageList, hash_value);
+
+	_InsertNotification(GameCommands::InitLockStep, messageList, -1);
+
+	_islocking = true;
 
 	// get everyone else commitments ( other people also broadcasting)
 
@@ -533,13 +541,24 @@ void LogicSystem::Lock_Step(GameCommands gamecommands)
 
 	// annouce action
 
+	// send actual thing
+	MessageList messageList;
+	Insert_Number_MessageList(messageList, _playerID);
+	Insert_Number_MessageList(messageList, gamecommands);
+
+	_InsertNotification(GameCommands::InitLockStep, messageList, -1);
+
 	// validate action
+	
+	TOO TIRED
 
 }
 
-void* LogicSystem::Hash(GameCommands gamecommands)
+size_t LogicSystem::Hash(GameCommands gamecommands)
 {
-	return nullptr;
+	std::hash<GameCommands> hash_function;
+	size_t hash_value = hash_function(gamecommands);
+	return hash_value;
 }
 
 void LogicSystem::PullEvent(float currgametime, Factory* factory)

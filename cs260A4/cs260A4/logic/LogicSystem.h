@@ -131,7 +131,7 @@ public:
 	void Lock_Step(GameCommands gamecommands);
 
 	// encrypt gamecommand using hash
-	void* Hash(GameCommands gamecommands);
+	size_t Hash(GameCommands gamecommands);
 public:
 
 //--------------------Initialise the LogicSystem------------------------------------
