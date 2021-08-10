@@ -10,7 +10,7 @@
 #define SYNCHRO 1
 
 // number of frames between each synchronise gameobject 
-#define SYNCHRO_COUNT 60 // every 1 seconds
+#define SYNCHRO_COUNT 120 // every 2 seconds
 
 
 
@@ -163,9 +163,12 @@ void LogicSystem::Wait_ForAllPlayers(WindowSystem& _windowSystem, InputSystem& i
 			}
 		}
 
-
 		clearEventsToBeDeleted();
 	}
+
+
+
+	PRINTOUT(" ");
 
 
 	//---------------All clients have connected from this point----------------------
@@ -179,6 +182,9 @@ void LogicSystem::Wait_ForAllPlayers(WindowSystem& _windowSystem, InputSystem& i
 		HostPlayer(true);
 	}
 
+
+	//let factory know yr playerID
+	gameFactory->_playerID = _playerID;
 
 	//broadcast to everyone their player Index
 	_InsertNotification(
@@ -222,9 +228,6 @@ void LogicSystem::Wait_ForAllPlayers(WindowSystem& _windowSystem, InputSystem& i
 
 	}
 
-	//let factory know yr playerID
-	gameFactory->_playerID = _playerID;
-
 
 
 	//--------All clients have made known their playerID to every client at this point----------
@@ -258,6 +261,9 @@ void LogicSystem::Update(const InputSystem& inputsystem, float dt, float gametim
 	//
 	// v1 = a*t + v0		//This is done when the UP or DOWN key is pressed 
 	// Pos1 = v1*t + Pos0
+
+
+	PRINTOUT("PlayerID: ", factory->_playerID, " ShipID: ", ownship.playerIndex, " PlayerGameObjectID: ", factory->_playerObjectID);
 
 	if (ownship.playerIndex >= 0)
 	{
@@ -321,6 +327,7 @@ void LogicSystem::Update(const InputSystem& inputsystem, float dt, float gametim
 			ownship.transform.rotation = Wrap(ownship.transform.rotation, -PI, PI);
 
 			MessageList messageList;
+			Insert_Number_MessageList(messageList, factory->_playerID);
 			Insert_Number_MessageList(messageList, ownship.transform.rotation);
 			// broadcast this acceleration to all other client
 			_InsertNotification(GameCommands::RotateLeft,
@@ -335,6 +342,7 @@ void LogicSystem::Update(const InputSystem& inputsystem, float dt, float gametim
 			ownship.transform.rotation = Wrap(ownship.transform.rotation, -PI, PI);
 
 			MessageList messageList;
+			Insert_Number_MessageList(messageList, factory->_playerID);
 			Insert_Number_MessageList(messageList, ownship.transform.rotation);
 			// broadcast this acceleration to all other client
 			_InsertNotification(GameCommands::RotateRight,
@@ -349,19 +357,16 @@ void LogicSystem::Update(const InputSystem& inputsystem, float dt, float gametim
 		{
 			// spawn bullet
 			Vector2 bulletvelocity = { cosf(ownship.transform.rotation) * bulletspeed, sinf(ownship.transform.rotation) * bulletspeed };
-			factory->CreateBullet(ownship.transform.position, ownship.transform.rotation, bulletvelocity, ownship.playerIndex);
+			Factory::gameObjectID gID = factory->CreateBullet
+				(ownship.transform.position, ownship.transform.rotation, bulletvelocity, ownship.playerIndex);
 
 			MessageList messageList;
-			Insert_Number_MessageList(messageList, ownship.transform.position.x);
-			Insert_Number_MessageList(messageList, ownship.transform.position.y);
-			Insert_Number_MessageList(messageList, ownship.transform.rotation);
-			Insert_Number_MessageList(messageList, bulletvelocity.x);
-			Insert_Number_MessageList(messageList, bulletvelocity.y);
-			Insert_Number_MessageList(messageList, ownship.playerIndex);
+			Insert_Number_MessageList(messageList, gID);
+			InsertGameObject_MessageList(messageList, factory->getGameObject(gID));
+
 			_InsertNotification(GameCommands::Shoot,
 				{ messageList },
 				-1);
-
 
 		}
 		if (_isHost)
@@ -605,14 +610,18 @@ void LogicSystem::PullEvent(float currgametime, Factory* factory)
 		else if (command == GameCommands::RotateLeft)
 		{
 			float receivedRotation;
-			Extract_Number_MessageList(0, messageList, receivedRotation);
-			factory->getPlayer(clientAddrIndex).transform.rotation = receivedRotation;
+			Factory::playerID pID;
+			Extract_Number_MessageList(0, messageList, pID);
+			Extract_Number_MessageList(1, messageList, receivedRotation);
+			factory->getPlayer(pID).transform.rotation = receivedRotation;
 		}
 		else if (command == GameCommands::RotateRight)
 		{
 			float receivedRotation;
-			Extract_Number_MessageList(0, messageList, receivedRotation);
-			factory->getPlayer(clientAddrIndex).transform.rotation = receivedRotation;
+			Factory::playerID pID;
+			Extract_Number_MessageList(0, messageList, pID);
+			Extract_Number_MessageList(1, messageList, receivedRotation);
+			factory->getPlayer(pID).transform.rotation = receivedRotation;
 		}
 		else if (command == GameCommands::Synchronise_Player)
 		{
@@ -621,32 +630,33 @@ void LogicSystem::PullEvent(float currgametime, Factory* factory)
 
 			GameObject& player_toSyn = factory->getPlayer(object.playerIndex);
 			
-			PRINTOUT("Before Synchronise : \n");
-			PRINTOUT("player position x : ", player_toSyn.transform.position.x , "\n");
-			PRINTOUT("player position y : ", player_toSyn.transform.position.y , "\n");
+			PRINTOUT("Before Synchronise: ", 
+				"player position x: ", 
+				player_toSyn.transform.position.x,  
+				" player position y : ", 
+				player_toSyn.transform.position.y);
 			
 
 			player_toSyn = object;
 
-			PRINTOUT("\n After Synchronise : \n");
-			PRINTOUT("player position x : ", player_toSyn.transform.position.x, "\n");
-			PRINTOUT("player position y : ", player_toSyn.transform.position.y, "\n");
+
+			PRINTOUT("After Synchronise: ",
+				"player position x: ",
+				player_toSyn.transform.position.x,
+				" player position y : ",
+				player_toSyn.transform.position.y, "\n");
 
 		}
 		else if (command == GameCommands::Shoot)
 		{
-			Vector2 position;
-			float rotation;
-			Vector2 velocity;
-			int playerindex;
+			Factory::gameObjectID gID = 0;
+			Extract_Number_MessageList(0, messageList, gID);
 
-			Extract_Number_MessageList(0, messageList, position.x);
-			Extract_Number_MessageList(1, messageList, position.y);
-			Extract_Number_MessageList(2, messageList, rotation);
-			Extract_Number_MessageList(3, messageList, velocity.x);
-			Extract_Number_MessageList(4, messageList, velocity.y);
-			Extract_Number_MessageList(5, messageList, playerindex);
-			factory->CreateBullet(position, rotation, velocity, playerindex);
+			GameObject object;
+			ExtractGameObject_MessageList(1, messageList, object);
+			factory->insertGameObject(gID, object);
+
+
 		}
 		else if (command == GameCommands::DestroyObject)
 		{
@@ -733,15 +743,15 @@ void LogicSystem::CheckCollision(Factory* factory)
 						factory->DeleteGameObjectID(pair2.first);
 
 						MessageList messageList;
-
 						Insert_Number_MessageList(messageList, pair.first);
 						_InsertNotification(GameCommands::DestroyObject, messageList, -1);
-
-
 						messageList.clear();
+
 
 						Insert_Number_MessageList(messageList, pair2.first);
 						_InsertNotification(GameCommands::DestroyObject, messageList, -1);
+						messageList.clear();
+
 
 						// update score, pair2.second is the bullet
 						if (pair2.second.playerIndex == 0)

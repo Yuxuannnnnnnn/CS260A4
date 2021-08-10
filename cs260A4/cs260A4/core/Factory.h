@@ -98,7 +98,7 @@ public:
 	std::vector<gameObjectID> Create_Asteroids_DataInitialisation()
 	{
 		srand(time(NULL));
-		int numberOfAsteroids = (rand() % 1) + 20;
+		int numberOfAsteroids = (rand() % 1) + 15;
 
 		std::vector <gameObjectID> objectlist;
 		for (int i = 0; i < numberOfAsteroids; i++)
@@ -151,10 +151,11 @@ public:
 		return counterID - 1;
 	}
 	                           
-	gameObjectID CreateBullet(const Vector2& position, 
-		float rotation, const Vector2& velocity, int playerindex)
+	gameObjectID CreateBullet(
+		const Vector2& position, 
+		float rotation, const Vector2& velocity, 
+		int playerindex)
 	{
-		
 		gameObjects[counterID] = GameObject{};
 
 		gameObjects[counterID].transform.position = position;
