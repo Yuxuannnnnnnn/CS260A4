@@ -583,6 +583,9 @@ public:
 	
 
 private:
+	// number of point scored, each client has 1
+	int _score = 0;
+	static constexpr int asteriod_reward = 10;
 
 	int _loopCounter = 0;
 	int _synCount = 10;

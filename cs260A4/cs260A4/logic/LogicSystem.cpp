@@ -146,7 +146,7 @@ void LogicSystem::Update(const InputSystem& inputsystem, float dt, float gametim
 		{
 			// spawn bullet
 			Vector2 bulletvelocity = { cosf(ownship.transform.rotation) * bulletspeed, sinf(ownship.transform.rotation) * bulletspeed };
-			factory->CreateBullet(ownship.transform.position, ownship.transform.rotation, bulletvelocity);
+			factory->CreateBullet(ownship.transform.position, ownship.transform.rotation, bulletvelocity, ownship.playerIndex);
 
 			MessageList messageList;
 			Insert_Number_MessageList(messageList, ownship.transform.position.x);
@@ -154,6 +154,7 @@ void LogicSystem::Update(const InputSystem& inputsystem, float dt, float gametim
 			Insert_Number_MessageList(messageList, ownship.transform.rotation);
 			Insert_Number_MessageList(messageList, bulletvelocity.x);
 			Insert_Number_MessageList(messageList, bulletvelocity.y);
+			Insert_Number_MessageList(messageList, ownship.playerIndex);
 			_InsertNotification(GameCommands::Shoot,
 				{ messageList },
 				-1);
@@ -424,13 +425,15 @@ void LogicSystem::PullEvent(float currgametime, Factory* factory)
 			Vector2 position;
 			float rotation;
 			Vector2 velocity;
+			int playerindex;
 
 			Extract_Number_MessageList(0, messageList, position.x);
 			Extract_Number_MessageList(1, messageList, position.y);
 			Extract_Number_MessageList(2, messageList, rotation);
 			Extract_Number_MessageList(3, messageList, velocity.x);
 			Extract_Number_MessageList(4, messageList, velocity.y);
-			factory->CreateBullet(position, rotation, velocity);
+			Extract_Number_MessageList(5, messageList, playerindex);
+			factory->CreateBullet(position, rotation, velocity, playerindex);
 		}
 		else if (command == GameCommands::DestroyObject)
 		{
@@ -438,48 +441,19 @@ void LogicSystem::PullEvent(float currgametime, Factory* factory)
 			Extract_Number_MessageList(0, messageList, ID);
 			factory->DeleteGameObjectID(ID);
 		}
+		else if (command == GameCommands::UpdateScore)
+		{
+			int playerindex;
+			Extract_Number_MessageList(0, messageList, playerindex);
 
+			if (_playerID == playerindex)
+			{
+				_score += asteriod_reward;
+			}
+		}
 	}
 	EventsList.clear();
 
-	// while event list not empty, pull events
-	//for (auto& eventpair : EventsList)
-	//{
-	//	auto command = eventpair.first;
-	//	switch (command)
-	//	{	
-	//	case (int)GameCommands::MoveForward:
-	//		DRData drdata;
-	//		playerIndex index = eventpair.first;
-	//		memcpy(&drdata, &(eventpair.second[0]), sizeof(DRData));
-
-	//		// find the correct player index from Gameobj container from factory
-
-	//		GameObject* player = nullptr;
-
-
-
-	//		break;
-	//	case (int)GameCommands::MoveBackward:
-	//		DRData drdata;
-	//		memcpy(&drdata, &(eventpair.second[0]), sizeof(DRData));
-
-	//		// find the correct player index from Gameobj container from factory
-
-	//		GameObject* player = nullptr;
-	//		PerformDR(player, currgametime, drdata.gametime, Vector2{ drdata.accelx, drdata.accely });
-
-
-	//		break;
-	//	case (int)GameCommands::RotateLeft:
-
-
-
-	//	}
-
-	//}
-
-	//EventsList.clear();
 }
 
 
@@ -555,6 +529,17 @@ void LogicSystem::CheckCollision(Factory* factory)
 						Insert_Number_MessageList(messageList, pair2.first);
 						_InsertNotification(GameCommands::DestroyObject, messageList, -1);
 
+						// update score, pair2.second is the bullet
+						if (pair2.second.playerIndex == 0)
+						{
+							_score += asteriod_reward;
+						}
+						else
+						{
+							MessageList messageList;
+							Insert_Number_MessageList(messageList, pair2.second.playerIndex);
+							_InsertNotification(GameCommands::UpdateScore, messageList, -1);
+						}
 					}
 				}
 

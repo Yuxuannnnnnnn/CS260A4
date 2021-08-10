@@ -150,8 +150,8 @@ public:
 
 		return counterID - 1;
 	}
-
-	gameObjectID CreateBullet(const Vector2& position, float rotation, const Vector2& velocity)
+	                           
+	gameObjectID CreateBullet(const Vector2& position, float rotation, const Vector2& velocity, int playerindex)
 	{
 		
 		gameObjects[counterID] = GameObject{};
@@ -166,7 +166,7 @@ public:
 		gameObjects[counterID].color = { 1.f, 0.f, 1.f };
 
 		gameObjects[counterID].obj_type = TYPE::TYPE_BULLET;
-
+		gameObjects[counterID].playerIndex = playerindex;
 		counterID++;
 
 		return counterID - 1;

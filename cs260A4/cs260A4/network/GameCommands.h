@@ -40,7 +40,7 @@ enum class GameCommands
 	//For Logic System usage
 	DestroyObject,
 	PlayerDied,
-
+	UpdateScore,
 	//For Lock-Step
 	
 	// initialiate an lockstep
