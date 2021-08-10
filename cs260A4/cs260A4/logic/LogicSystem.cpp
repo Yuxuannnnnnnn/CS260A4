@@ -5,7 +5,7 @@
 #include "../network/GameCommands.h"
 
 #include "../window/WindowSystem.h"
-
+#include <functional>
 // macro to enable/disable synchroise
 #define SYNCHRO 1
 
@@ -26,7 +26,7 @@ void LogicSystem::GameMenu(NetworkSystem* networkSystem)
 	{
 		std::string userInput;
 
-		
+
 		std::cout << userInput << std::endl;
 		//join a game
 		if (!userInput.compare("J"))
@@ -264,16 +264,25 @@ void LogicSystem::Update(const InputSystem& inputsystem, float dt, float gametim
 
 
 	PRINTOUT("PlayerID: ", factory->_playerID, " ShipID: ", ownship.playerIndex, " PlayerGameObjectID: ", factory->_playerObjectID);
+	if (wCoolDown > 0.5f)
+		wCoolDown -= dt;
+
+	if (sCoolDown > 0.5f)
+		sCoolDown -= dt;
+
 
 	if (ownship.playerIndex >= 0)
 	{
 		/*std::cout << "Factory PID: " << factory->_playerID << ","
 				<< "SHIP PID: "  << ownship.playerIndex << std::endl;*/
 
-		if (inputsystem.KeyHold(VK_W))
+		if (inputsystem.KeyHold(VK_W) && wCoolDown < 1.0f)
 		{
+
 			Vector2 accel{ cosf(ownship.transform.rotation) * acceleration_speed,
-								 sinf(ownship.transform.rotation) * acceleration_speed};
+								 sinf(ownship.transform.rotation) * acceleration_speed };
+
+			
 
 			factory->getOwnPlayer().rigidbody.acceleration = accel;
 
@@ -286,17 +295,17 @@ void LogicSystem::Update(const InputSystem& inputsystem, float dt, float gametim
 
 			// -1 is broadcast
 			_InsertNotification(GameCommands::MoveForward, { messageList }, -1);
-
+			wCoolDown = 3.0f;
 
 			ownship.rigidbody.velocity = ownship.rigidbody.velocity + accel * dt;
 			// (from CS230) scale velocity by 0.99 to simulate drag and prevent velocity out of control
 			ownship.rigidbody.velocity = ownship.rigidbody.velocity * 0.99f;
 
 
-		
+
 		}
 
-		if (inputsystem.KeyHold(VK_S))
+		if (inputsystem.KeyHold(VK_S) && sCoolDown < 1.0f)
 		{
 			Vector2 accel{ cosf(ownship.transform.rotation) * -acceleration_speed * dt,
 								 sinf(ownship.transform.rotation) * -acceleration_speed * dt };
@@ -313,7 +322,7 @@ void LogicSystem::Update(const InputSystem& inputsystem, float dt, float gametim
 
 			// -1 is broadcast
 			_InsertNotification(GameCommands::MoveBackward, { messageList }, -1);
-
+			sCoolDown = 3.0f;
 
 			ownship.rigidbody.velocity = ownship.rigidbody.velocity + accel * dt;
 
@@ -358,7 +367,7 @@ void LogicSystem::Update(const InputSystem& inputsystem, float dt, float gametim
 			// spawn bullet
 			Vector2 bulletvelocity = { cosf(ownship.transform.rotation) * bulletspeed, sinf(ownship.transform.rotation) * bulletspeed };
 			Factory::gameObjectID gID = factory->CreateBullet
-				(ownship.transform.position, ownship.transform.rotation, bulletvelocity, ownship.playerIndex);
+			(ownship.transform.position, ownship.transform.rotation, bulletvelocity, ownship.playerIndex);
 
 			MessageList messageList;
 			Insert_Number_MessageList(messageList, gID);
@@ -523,9 +532,17 @@ void LogicSystem::TestUpdate(const InputSystem& inputsystem, float dt, std::vect
 
 void LogicSystem::Lock_Step(GameCommands gamecommands)
 {
-	committment = Hash(gamecommands);
+	size_t hash_value = Hash(gamecommands);
+
 
 	// broadcast the commitment
+	MessageList messageList;
+	Insert_Number_MessageList(messageList, _playerID);
+	Insert_Number_MessageList(messageList, hash_value);
+
+	_InsertNotification(GameCommands::InitLockStep, messageList, -1);
+
+	_islocking = true;
 
 	// get everyone else commitments ( other people also broadcasting)
 
@@ -533,13 +550,23 @@ void LogicSystem::Lock_Step(GameCommands gamecommands)
 
 	// annouce action
 
+	// send actual thing
+	messageList.clear();
+	Insert_Number_MessageList(messageList, _playerID);
+	//Insert_Number_MessageList(messageList, gamecommands);
+
+	_InsertNotification(GameCommands::InitLockStep, messageList, -1);
+
 	// validate action
+
 
 }
 
-void* LogicSystem::Hash(GameCommands gamecommands)
+size_t LogicSystem::Hash(GameCommands gamecommands)
 {
-	return nullptr;
+	std::hash<GameCommands> hash_function;
+	size_t hash_value = hash_function(gamecommands);
+	return hash_value;
 }
 
 void LogicSystem::PullEvent(float currgametime, Factory* factory)
@@ -631,13 +658,13 @@ void LogicSystem::PullEvent(float currgametime, Factory* factory)
 			ExtractGameObject_MessageList(0, messageList, object);
 
 			GameObject& player_toSyn = factory->getPlayer(object.playerIndex);
-			
-			PRINTOUT("Before Synchronise: ", 
-				"player position x: ", 
-				player_toSyn.transform.position.x,  
-				" player position y : ", 
+
+			PRINTOUT("Before Synchronise: ",
+				"player position x: ",
+				player_toSyn.transform.position.x,
+				" player position y : ",
 				player_toSyn.transform.position.y);
-			
+
 
 			player_toSyn = object;
 
@@ -758,7 +785,7 @@ void LogicSystem::CheckCollision(Factory* factory)
 						// update score, pair2.second is the bullet
 						if (pair2.second.playerIndex == 0)
 						{
-							_score += asteriod_reward; 
+							_score += asteriod_reward;
 							std::cout << "New Score : " << _score << std::endl;
 						}
 						else
