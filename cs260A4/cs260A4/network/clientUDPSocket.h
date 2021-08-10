@@ -158,7 +158,7 @@ public:
 		for (auto& addrPair : Index_Addresses)
 		{
 			//find the pair with the sockaddr
-			if (!memcmp(&addrPair.second, &addr, sizeof(addr)))
+			if (!memcmp(&(addrPair.second), &addr, sizeof(addr)))
 			{
 				return addrPair.first;
 			}

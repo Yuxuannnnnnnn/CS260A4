@@ -311,6 +311,8 @@ public:
 				//wait for clients to respond their clientsAddressIndex
 				if (command == GameCommands::SendIndex)
 				{
+					EventsDeletionList.push_back(i);
+
 					//extract playerID
 					int playerID = -1;
 					memcpy(&playerID, messageList[0].message, messageList[0].size_);
@@ -321,7 +323,6 @@ public:
 					//increment number of players that has made their playerID known
 					countPlayersSentIndex++;
 				}
-				EventsDeletionList.push_back(i);
 			}
 			clearEventsToBeDeleted();
 

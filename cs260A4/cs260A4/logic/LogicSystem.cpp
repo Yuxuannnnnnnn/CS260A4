@@ -15,6 +15,7 @@
 
 void LogicSystem::Update(const InputSystem& inputsystem, float dt, float gametime, Factory* factory)
 {
+	PullEvent(gametime, factory);
 
 
 	// get the reference of Ship belong to this client
@@ -167,7 +168,6 @@ void LogicSystem::Update(const InputSystem& inputsystem, float dt, float gametim
 	}
 #endif
 
-	PullEvent(gametime, factory);
 }
 
 
@@ -354,6 +354,9 @@ void LogicSystem::PullEvent(float currgametime, Factory* factory)
 				factory->insertGameObject(gameObjectID, object);
 
 				factory->insertPlayerID_GameObject(object.playerIndex, gameObjectID);
+
+				if (factory->_playerID == object.playerIndex)
+					factory->_playerObjectID = gameObjectID;
 			}
 
 		}
