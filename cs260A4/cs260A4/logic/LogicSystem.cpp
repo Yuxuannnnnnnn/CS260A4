@@ -45,8 +45,8 @@ void LogicSystem::Update(const InputSystem& inputsystem, float dt, float gametim
 
 		if (inputsystem.KeyHold(VK_W))
 		{
-			Vector2 accel{ cosf(ownship.transform.rotation) * acceleration_speed * dt,
-								 sinf(ownship.transform.rotation) * acceleration_speed * dt };
+			Vector2 accel{ cosf(ownship.transform.rotation) * acceleration_speed,
+								 sinf(ownship.transform.rotation) * acceleration_speed};
 
 			factory->getOwnPlayer().rigidbody.acceleration = accel;
 
@@ -60,31 +60,13 @@ void LogicSystem::Update(const InputSystem& inputsystem, float dt, float gametim
 			// -1 is broadcast
 			_InsertNotification(GameCommands::MoveForward, { messageList }, -1);
 
-			ownship.rigidbody.velocity = ownship.rigidbody.velocity + accel;
+
+			ownship.rigidbody.velocity = ownship.rigidbody.velocity + accel * dt;
 			// (from CS230) scale velocity by 0.99 to simulate drag and prevent velocity out of control
 			ownship.rigidbody.velocity = ownship.rigidbody.velocity * 0.99f;
 
 
-			// _playerID is the global player index
-
-			// convert everything to string
-
-			std::string drdatastring;
-
-			// size of 
-
-			//DRData drdata{ (float)htonl(accel.x), (float)htonl(accel.y), htonl(gametime), htonl(_playerID) };
-
-
-		/*	_InsertNotification(GameCommands::MoveForward,
-				{ {(char*)&drdata, sizeof(DRData)} },
-				-1);*/
-
-				// end broadcast
-			ownship.rigidbody.velocity = ownship.rigidbody.velocity + accel;
-
-			// (from CS230) scale velocity by 0.99 to simulate drag and prevent velocity out of control
-			ownship.rigidbody.velocity = ownship.rigidbody.velocity * 0.99f;
+		
 		}
 
 		if (inputsystem.KeyHold(VK_S))
@@ -106,7 +88,7 @@ void LogicSystem::Update(const InputSystem& inputsystem, float dt, float gametim
 			_InsertNotification(GameCommands::MoveBackward, { messageList }, -1);
 
 
-			ownship.rigidbody.velocity = ownship.rigidbody.velocity + accel;
+			ownship.rigidbody.velocity = ownship.rigidbody.velocity + accel * dt;
 
 			// (from CS230) scale velocity by 0.99 to simulate drag and prevent velocity out of control
 			ownship.rigidbody.velocity = ownship.rigidbody.velocity * 0.99f;
@@ -449,6 +431,7 @@ void LogicSystem::PullEvent(float currgametime, Factory* factory)
 			if (_playerID == playerindex)
 			{
 				_score += asteriod_reward;
+				std::cout << "New Score : " << _score << std::endl;
 			}
 		}
 	}
@@ -532,7 +515,8 @@ void LogicSystem::CheckCollision(Factory* factory)
 						// update score, pair2.second is the bullet
 						if (pair2.second.playerIndex == 0)
 						{
-							_score += asteriod_reward;
+							_score += asteriod_reward; 
+							std::cout << "New Score : " << _score << std::endl;
 						}
 						else
 						{
