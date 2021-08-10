@@ -4,12 +4,13 @@
 #include "../physics/Vector2.h"
 #include "../network/GameCommands.h"
 #include <winsock.h>
+#include "../Tools/EngineSettings.h"
 
 // macro to enable/disable synchroise
 #define SYNCHRO 0
 
 // number of frames between each synchronise gameobject 
-#define SYNCHRO_COUNT 360 // every 3 seconds
+#define SYNCHRO_COUNT 60 // every 1 seconds
 
 
 
@@ -399,7 +400,17 @@ void LogicSystem::PullEvent(float currgametime, Factory* factory)
 			ExtractGameObject_MessageList(0, messageList, object);
 
 			GameObject& player_toSyn = factory->getPlayer(object.playerIndex);
+			
+			PRINTOUT("Before Synchronise : \n");
+			PRINTOUT("player position x : ", player_toSyn.transform.position.x , "\n");
+			PRINTOUT("player position y : ", player_toSyn.transform.position.y , "\n");
+			
+
 			player_toSyn = object;
+
+			PRINTOUT("\n After Synchronise : \n");
+			PRINTOUT("player position x : ", player_toSyn.transform.position.x, "\n");
+			PRINTOUT("player position y : ", player_toSyn.transform.position.y, "\n");
 
 		}
 		else if (command == GameCommands::Shoot)
