@@ -37,6 +37,8 @@ struct GameObject
 		
 	}
 
+	~GameObject() = default;
+
 	Transforms transform; //will use this for graphics
 	Rigidbody rigidbody;
 	AABBCollider aabb;  //all asteroids will be the same size collider

@@ -15,7 +15,7 @@
 
 void LogicSystem::Update(const InputSystem& inputsystem, float dt, float gametime, Factory* factory)
 {
-	PullEvent(gametime, factory);
+		PullEvent(gametime, factory);
 
 
 	// get the reference of Ship belong to this client
@@ -38,135 +38,138 @@ void LogicSystem::Update(const InputSystem& inputsystem, float dt, float gametim
 	// v1 = a*t + v0		//This is done when the UP or DOWN key is pressed 
 	// Pos1 = v1*t + Pos0
 
-	if (inputsystem.KeyHold(VK_W))
+	if (ownship.playerIndex >= 0)
 	{
-		Vector2 accel{ cosf(ownship.transform.rotation) * acceleration_speed * dt,
-							 sinf(ownship.transform.rotation) * acceleration_speed * dt };
+		if (inputsystem.KeyHold(VK_W))
+		{
+			Vector2 accel{ cosf(ownship.transform.rotation) * acceleration_speed * dt,
+								 sinf(ownship.transform.rotation) * acceleration_speed * dt };
 
-		factory->getOwnPlayer().rigidbody.acceleration = accel;
+			factory->getOwnPlayer().rigidbody.acceleration = accel;
 
-		// broadcast this acceleration to all other client
-
-
-		DRData drdata{ accel.x, accel.y, gametime, _playerID };// playerID is the global ID 
-		MessageList messageList;
-		InsertDRData_MessageList(messageList, drdata);
-
-		// -1 is broadcast
-		_InsertNotification(GameCommands::MoveForward, { messageList }, -1);
-
-		ownship.rigidbody.velocity = ownship.rigidbody.velocity + accel;
-		// (from CS230) scale velocity by 0.99 to simulate drag and prevent velocity out of control
-		ownship.rigidbody.velocity = ownship.rigidbody.velocity * 0.99f;
+			// broadcast this acceleration to all other client
 
 
-		// _playerID is the global player index
+			DRData drdata{ accel.x, accel.y, gametime, _playerID };// playerID is the global ID 
+			MessageList messageList;
+			InsertDRData_MessageList(messageList, drdata);
 
-		// convert everything to string
+			// -1 is broadcast
+			_InsertNotification(GameCommands::MoveForward, { messageList }, -1);
 
-		std::string drdatastring;
-
-		// size of 
-
-		//DRData drdata{ (float)htonl(accel.x), (float)htonl(accel.y), htonl(gametime), htonl(_playerID) };
+			ownship.rigidbody.velocity = ownship.rigidbody.velocity + accel;
+			// (from CS230) scale velocity by 0.99 to simulate drag and prevent velocity out of control
+			ownship.rigidbody.velocity = ownship.rigidbody.velocity * 0.99f;
 
 
-	/*	_InsertNotification(GameCommands::MoveForward,
-			{ {(char*)&drdata, sizeof(DRData)} },
-			-1);*/
+			// _playerID is the global player index
+
+			// convert everything to string
+
+			std::string drdatastring;
+
+			// size of 
+
+			//DRData drdata{ (float)htonl(accel.x), (float)htonl(accel.y), htonl(gametime), htonl(_playerID) };
+
+
+		/*	_InsertNotification(GameCommands::MoveForward,
+				{ {(char*)&drdata, sizeof(DRData)} },
+				-1);*/
+
+				// end broadcast
+			ownship.rigidbody.velocity = ownship.rigidbody.velocity + accel;
+
+			// (from CS230) scale velocity by 0.99 to simulate drag and prevent velocity out of control
+			ownship.rigidbody.velocity = ownship.rigidbody.velocity * 0.99f;
+		}
+
+		if (inputsystem.KeyHold(VK_S))
+		{
+			Vector2 accel{ cosf(ownship.transform.rotation) * -acceleration_speed * dt,
+								 sinf(ownship.transform.rotation) * -acceleration_speed * dt };
+
+			ownship.rigidbody.acceleration = accel;
+
+
+			// playerID is the global ID 
+
+			DRData drdata{ accel.x, accel.y, gametime, _playerID };
+
+			MessageList messageList;
+			InsertDRData_MessageList(messageList, drdata);
+
+			// -1 is broadcast
+			_InsertNotification(GameCommands::MoveBackward, { messageList }, -1);
+
+
+			ownship.rigidbody.velocity = ownship.rigidbody.velocity + accel;
+
+			// (from CS230) scale velocity by 0.99 to simulate drag and prevent velocity out of control
+			ownship.rigidbody.velocity = ownship.rigidbody.velocity * 0.99f;
+		}
+
+		if (inputsystem.KeyHold(VK_A))
+		{
+			ownship.transform.rotation += rotation_speed * dt;
+			ownship.transform.rotation = Wrap(ownship.transform.rotation, -PI, PI);
+
+			MessageList messageList;
+			Insert_Number_MessageList(messageList, ownship.transform.rotation);
+			// broadcast this acceleration to all other client
+			_InsertNotification(GameCommands::RotateLeft,
+				{ messageList },
+				-1);
+			// end broadcast
+		}
+
+		if (inputsystem.KeyHold(VK_D))
+		{
+			ownship.transform.rotation -= rotation_speed * dt;
+			ownship.transform.rotation = Wrap(ownship.transform.rotation, -PI, PI);
+
+			MessageList messageList;
+			Insert_Number_MessageList(messageList, ownship.transform.rotation);
+			// broadcast this acceleration to all other client
+			_InsertNotification(GameCommands::RotateRight,
+				{ messageList },
+				-1);
+
 
 			// end broadcast
-		ownship.rigidbody.velocity = ownship.rigidbody.velocity + accel;
+		}
 
-		// (from CS230) scale velocity by 0.99 to simulate drag and prevent velocity out of control
-		ownship.rigidbody.velocity = ownship.rigidbody.velocity * 0.99f;
-	}
+		if (inputsystem.KeyPressed(VK_SPACEBAR))
+		{
+			// spawn bullet
+			Vector2 bulletvelocity = { cosf(ownship.transform.rotation) * bulletspeed, sinf(ownship.transform.rotation) * bulletspeed };
+			factory->CreateBullet(ownship.transform.position, ownship.transform.rotation, bulletvelocity);
 
-	if (inputsystem.KeyHold(VK_S))
-	{
-		Vector2 accel{ cosf(ownship.transform.rotation) * -acceleration_speed * dt,
-							 sinf(ownship.transform.rotation) * -acceleration_speed * dt };
-
-		ownship.rigidbody.acceleration = accel;
-
-
-		// playerID is the global ID 
-
-		DRData drdata{ accel.x, accel.y, gametime, _playerID };
-
-		MessageList messageList;
-		InsertDRData_MessageList(messageList, drdata);
-
-		// -1 is broadcast
-		_InsertNotification(GameCommands::MoveBackward, { messageList }, -1);
+			MessageList messageList;
+			Insert_Number_MessageList(messageList, ownship.transform.position.x);
+			Insert_Number_MessageList(messageList, ownship.transform.position.y);
+			Insert_Number_MessageList(messageList, ownship.transform.rotation);
+			Insert_Number_MessageList(messageList, bulletvelocity.x);
+			Insert_Number_MessageList(messageList, bulletvelocity.y);
+			_InsertNotification(GameCommands::Shoot,
+				{ messageList },
+				-1);
 
 
-		ownship.rigidbody.velocity = ownship.rigidbody.velocity + accel;
-
-		// (from CS230) scale velocity by 0.99 to simulate drag and prevent velocity out of control
-		ownship.rigidbody.velocity = ownship.rigidbody.velocity * 0.99f;
-	}
-
-	if (inputsystem.KeyHold(VK_A))
-	{
-		ownship.transform.rotation += rotation_speed * dt;
-		ownship.transform.rotation = Wrap(ownship.transform.rotation, -PI, PI);
-
-		MessageList messageList;
-		Insert_Number_MessageList(messageList, ownship.transform.rotation);
-		// broadcast this acceleration to all other client
-		_InsertNotification(GameCommands::RotateLeft,
-			{ messageList },
-			-1);
-		// end broadcast
-	}
-
-	if (inputsystem.KeyHold(VK_D))
-	{
-		ownship.transform.rotation -= rotation_speed * dt;
-		ownship.transform.rotation = Wrap(ownship.transform.rotation, -PI, PI);
-
-		MessageList messageList;
-		Insert_Number_MessageList(messageList, ownship.transform.rotation);
-		// broadcast this acceleration to all other client
-		_InsertNotification(GameCommands::RotateRight,
-			{ messageList },
-			-1);
-
-
-		// end broadcast
-	}
-
-	if (inputsystem.KeyPressed(VK_SPACEBAR))
-	{
-		// spawn bullet
-		Vector2 bulletvelocity = { cosf(ownship.transform.rotation) * bulletspeed, sinf(ownship.transform.rotation) * bulletspeed };
-		factory->CreateBullet(ownship.transform.position, ownship.transform.rotation, bulletvelocity);
-
-		MessageList messageList;
-		Insert_Number_MessageList(messageList, ownship.transform.position.x);
-		Insert_Number_MessageList(messageList, ownship.transform.position.y);
-		Insert_Number_MessageList(messageList, ownship.transform.rotation);
-		Insert_Number_MessageList(messageList, bulletvelocity.x);
-		Insert_Number_MessageList(messageList, bulletvelocity.y);
-		_InsertNotification(GameCommands::Shoot,
-			{ messageList },
-			-1);
-
-
-	}
-	if (_isHost)
-	{
-		CheckCollision(factory);
-	}
+		}
+		if (_isHost)
+		{
+			CheckCollision(factory);
+		}
 #if SYNCHRO
-	_loopCounter++;
-	if (_loopCounter >= SYNCHRO_COUNT)
-	{
-		_loopCounter = 0;
-		SynchronisePosition(factory);
-	}
+		_loopCounter++;
+		if (_loopCounter >= SYNCHRO_COUNT)
+		{
+			_loopCounter = 0;
+			SynchronisePosition(factory);
+		}
 #endif
+	}
 
 }
 
