@@ -23,7 +23,7 @@ void PhysicSystem::UpdateTransform(GameObject& gameobj, float dt)
 	gameobj.aabb.min = { gameobj.transform.position.x - 0.5f * gameobj.transform.scale.x, gameobj.transform.position.y - 0.5f * gameobj.transform.scale.y };
 	gameobj.aabb.max = { gameobj.transform.position.x + 0.5f * gameobj.transform.scale.x, gameobj.transform.position.y + 0.5f * gameobj.transform.scale.y };
 
-	if (gameobj.obj_type == TYPE_BULLET)
+	if (gameobj.obj_type == TYPE::TYPE_BULLET)
 		return;
 
 	gameobj.transform.position.x = Wrap(gameobj.transform.position.x, -400, 400);

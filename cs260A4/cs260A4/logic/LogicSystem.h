@@ -265,8 +265,8 @@ public:
 				messageList.clear();
 
 				//add new asteroids count to the asteroidsCounter
-				int addNewAsteroids =(AsteroidsList.size() - asteroidsCounter) < 5?
-					(AsteroidsList.size() - asteroidsCounter) : 5;
+				int addNewAsteroids = (int)((AsteroidsList.size() - asteroidsCounter) < 5?
+					(AsteroidsList.size() - asteroidsCounter) : 5);
 
 				//players need to know the number of gameObjects in each message
 				//push number of gameObjects
@@ -344,8 +344,8 @@ public:
 	template<typename type>
 	void Insert_Number_MessageList(MessageList& messageList, const type& number)
 	{
-		messageList.push_back({ std::to_string(number).c_str(),
-		std::to_string(number).size() + sizeof("\0") });
+		messageList.push_back({ std::to_string((float)number).c_str(),
+		std::to_string((float)number).size() + sizeof("\0") });
 	}
 
 	template<typename type>

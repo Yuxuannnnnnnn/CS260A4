@@ -61,7 +61,7 @@ public:
 		colorList[2] = {0.f, 1.0f, 0.f};
 		colorList[3] = {1.0f, 1.0f, 0.f};
 
-		for (size_t i = 0; i < numberOfPlayers; i++)
+		for (int i = 0; i < numberOfPlayers; i++)
 		{
 			//create all ship & assign the indices to them
 			playerObjectsList[i] = CreateShip(i, colorList[i]);
@@ -97,7 +97,7 @@ public:
 
 	std::vector<gameObjectID> Create_Asteroids_DataInitialisation()
 	{
-		srand(time(NULL));
+		srand((unsigned)(time(NULL)));
 		int numberOfAsteroids = (rand() % 1) + 15;
 
 		std::vector <gameObjectID> objectlist;
@@ -106,7 +106,7 @@ public:
 			if (!(i % 10))
 			{
 				std::this_thread::sleep_for(std::chrono::milliseconds(50));
-				srand(time(NULL));
+				srand((unsigned)(time(NULL)));
 			}
 			if (i % 2)
 			{

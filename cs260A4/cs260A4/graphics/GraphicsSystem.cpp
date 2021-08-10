@@ -28,7 +28,7 @@ void GraphicsSystem::RenderGameObject(GameObject& gameobj)
 	_shader.use();
 	_shader.setMat4("u_MVP", mvp);
 	// triangle mesh
-	if (gameobj.obj_type == TYPE_PLAYER)
+	if (gameobj.obj_type == TYPE::TYPE_PLAYER)
 	{
 
 		switch (gameobj.playerIndex)
@@ -55,10 +55,10 @@ void GraphicsSystem::RenderGameObject(GameObject& gameobj)
 		glBindVertexArray(_vaoquad);
 
 		// set color base on bullet, asteriod 
-		if (gameobj.obj_type == TYPE_ASTEROID)
-			_shader.setVec3("u_Color", 0.5, 0.1, 1);
-		if (gameobj.obj_type == TYPE_BULLET)
-			_shader.setVec3("u_Color", 0.5, 0.3, 0.05);
+		if (gameobj.obj_type == TYPE::TYPE_ASTEROID)
+			_shader.setVec3("u_Color", 0.5f, 0.1f, 1.f);
+		if (gameobj.obj_type == TYPE::TYPE_BULLET)
+			_shader.setVec3("u_Color", 0.5f, 0.3f, 0.05f);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 	}
 

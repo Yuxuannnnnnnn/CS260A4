@@ -164,7 +164,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="core\Factory.h" />
-    <ClInclude Include="core\testgame.h" />
     <ClInclude Include="Dep\glew\GL\glew.h" />
     <ClInclude Include="graphics\Camera.h" />
     <ClInclude Include="graphics\FrameBuffer.h" />

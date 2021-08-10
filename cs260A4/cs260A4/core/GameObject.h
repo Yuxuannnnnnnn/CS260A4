@@ -6,7 +6,7 @@
 
 #include "../Math/Vector.h"
 
-enum TYPE
+enum class TYPE
 {
 	TYPE_PLAYER = 0,
 	TYPE_BULLET,
@@ -16,7 +16,7 @@ enum TYPE
 
 
 
-enum MeshType
+enum class MeshType
 {
 	quad,
 	triangle
@@ -25,9 +25,12 @@ enum MeshType
 
 struct GameObject
 {
-	GameObject() = default;
+	GameObject()
+	{
 
-	GameObject(const Transforms& trans, const Rigidbody& rb, TYPE objtype, MeshType meshtype = quad, int playerindex = -1)
+	}
+
+	GameObject(const Transforms& trans, const Rigidbody& rb, TYPE objtype, MeshType meshtype = MeshType::quad, int playerindex = -1)
 	{
 		transform = trans;
 		rigidbody = rb;
@@ -37,17 +40,20 @@ struct GameObject
 		
 	}
 
-	~GameObject() = default;
+	~GameObject()
+	{
+
+	}
 
 	Transforms transform; //will use this for graphics
 	Rigidbody rigidbody;
 	AABBCollider aabb;  //all asteroids will be the same size collider
 	
 
-	MeshType mesh{quad};
+	MeshType mesh{ MeshType::quad};
 	Vector3 color;
 	
-	TYPE obj_type;
+	TYPE obj_type{ TYPE::TYPE_NUM };
 	int playerIndex{ -1 };
 
 	// test code, remove later

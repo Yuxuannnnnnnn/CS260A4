@@ -80,7 +80,7 @@ public:
 
 
 	//address to send broadcast
-	struct sockaddr_in Broadcast_Sending_addr;
+	struct sockaddr_in Broadcast_Sending_addr {};
 
 
 	//A value  indicting a rate of packet loss simulated 
@@ -276,7 +276,7 @@ public:
 				const char* messageCharArray = messageFromClient;
 
 				//Extract the command (1bytes)
-				memcpy(&command, messageCharArray, sizeof(command));
+				memcpy_s(&command, sizeof(command), messageCharArray, sizeof(command));
 
 				//Extract the LengthOfPayload (4bytes)
 				memcpy(&LengthOfPayload,
@@ -321,10 +321,8 @@ public:
 		{
 			short size = 0;
 			//Copy size of message into MessageBuffer
-			memcpy_s((void*)&size,
-				sizeof(short),
-				messageFromClient + offset_size,
-				sizeof(short));
+			memcpy_s((void*)&size, sizeof(short),
+				messageFromClient + offset_size, sizeof(short));
 			//the total offset size
 			offset_size += sizeof(short);
 			//left over length of payload

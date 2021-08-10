@@ -19,7 +19,7 @@ public:
 			gameobj.aabb.min = { gameobj.transform.position.x - 0.5f * gameobj.transform.scale.x, gameobj.transform.position.y - 0.5f * gameobj.transform.scale.y };
 			gameobj.aabb.max = { gameobj.transform.position.x + 0.5f * gameobj.transform.scale.x, gameobj.transform.position.y + 0.5f * gameobj.transform.scale.y };
 
-			if (gameobj.obj_type == TYPE_BULLET)
+			if (gameobj.obj_type == TYPE::TYPE_BULLET)
 				continue;
 
 			gameobj.transform.position.x = Wrap(gameobj.transform.position.x, -400, 400);
@@ -32,11 +32,11 @@ public:
 			if (gameobj.isActive == false)
 				continue;
 
-			if (gameobj.obj_type == TYPE_BULLET)
+			if (gameobj.obj_type == TYPE::TYPE_BULLET)
 			{
 				for (auto& gameobj2 : objlist)
 				{
-					if (gameobj2.obj_type == TYPE_ASTEROID)
+					if (gameobj2.obj_type == TYPE::TYPE_ASTEROID)
 					{
 						if (CollisionIntersection(gameobj.aabb, gameobj2.aabb))
 						{
