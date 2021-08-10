@@ -264,16 +264,25 @@ void LogicSystem::Update(const InputSystem& inputsystem, float dt, float gametim
 
 
 	PRINTOUT("PlayerID: ", factory->_playerID, " ShipID: ", ownship.playerIndex, " PlayerGameObjectID: ", factory->_playerObjectID);
+	if (wCoolDown > 0.5f)
+		wCoolDown -= dt;
+
+	if (sCoolDown > 0.5f)
+		sCoolDown -= dt;
+
 
 	if (ownship.playerIndex >= 0)
 	{
 		/*std::cout << "Factory PID: " << factory->_playerID << ","
 				<< "SHIP PID: "  << ownship.playerIndex << std::endl;*/
 
-		if (inputsystem.KeyHold(VK_W))
+		if (inputsystem.KeyHold(VK_W) && wCoolDown < 1.0f)
 		{
+
 			Vector2 accel{ cosf(ownship.transform.rotation) * acceleration_speed,
 								 sinf(ownship.transform.rotation) * acceleration_speed };
+
+			
 
 			factory->getOwnPlayer().rigidbody.acceleration = accel;
 
@@ -286,7 +295,7 @@ void LogicSystem::Update(const InputSystem& inputsystem, float dt, float gametim
 
 			// -1 is broadcast
 			_InsertNotification(GameCommands::MoveForward, { messageList }, -1);
-
+			wCoolDown = 3.0f;
 
 			ownship.rigidbody.velocity = ownship.rigidbody.velocity + accel * dt;
 			// (from CS230) scale velocity by 0.99 to simulate drag and prevent velocity out of control
@@ -296,7 +305,7 @@ void LogicSystem::Update(const InputSystem& inputsystem, float dt, float gametim
 
 		}
 
-		if (inputsystem.KeyHold(VK_S))
+		if (inputsystem.KeyHold(VK_S) && sCoolDown < 1.0f)
 		{
 			Vector2 accel{ cosf(ownship.transform.rotation) * -acceleration_speed * dt,
 								 sinf(ownship.transform.rotation) * -acceleration_speed * dt };
@@ -313,7 +322,7 @@ void LogicSystem::Update(const InputSystem& inputsystem, float dt, float gametim
 
 			// -1 is broadcast
 			_InsertNotification(GameCommands::MoveBackward, { messageList }, -1);
-
+			sCoolDown = 3.0f;
 
 			ownship.rigidbody.velocity = ownship.rigidbody.velocity + accel * dt;
 
