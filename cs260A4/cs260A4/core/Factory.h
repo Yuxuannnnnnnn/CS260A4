@@ -199,6 +199,7 @@ public:
 	GameObject& getOwnPlayer()
 	{
 		return gameObjects[_playerObjectID];
+
 	}
 
 	//for logicSystem to get any opponent player GameObject
