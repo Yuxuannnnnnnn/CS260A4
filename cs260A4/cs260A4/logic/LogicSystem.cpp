@@ -7,7 +7,7 @@
 #include "../Tools/EngineSettings.h"
 
 // macro to enable/disable synchroise
-#define SYNCHRO 0
+#define SYNCHRO 1
 
 // number of frames between each synchronise gameobject 
 #define SYNCHRO_COUNT 60 // every 1 seconds
@@ -41,8 +41,8 @@ void LogicSystem::Update(const InputSystem& inputsystem, float dt, float gametim
 
 	if (ownship.playerIndex >= 0)
 	{
-		std::cout << "Factory PID: " << factory->_playerID << ","
-				<< "SHIP PID: "  << ownship.playerIndex << std::endl;
+		/*std::cout << "Factory PID: " << factory->_playerID << ","
+				<< "SHIP PID: "  << ownship.playerIndex << std::endl;*/
 
 		if (inputsystem.KeyHold(VK_W))
 		{
