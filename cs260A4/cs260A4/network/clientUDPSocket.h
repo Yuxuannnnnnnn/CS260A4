@@ -372,11 +372,10 @@ public:
 	}
 
 
-	void print_ipv4(struct sockaddr* s)
+	char*  print_ipv4(struct sockaddr* s, uint16_t& port)
 	{
 		struct sockaddr_in* sin = (struct sockaddr_in*)s;
-		char ip[100] = "\0";
-		uint16_t port;
+		char* ip = new char[100];
 
 		char buffer[100] = "\0";
 		//inet_ntop(AF_INET, (const void *)(sin->sin_addr),
@@ -388,7 +387,8 @@ public:
 		//inet_pton(AF_INET, buffer, ip);
 		port = htons(sin->sin_port);
 
-		printf("host port: %d, ip: %s\n", port, ip);
+		//printf("host port: %d, ip: %s\n", port, ip);
+		return ip;
 	}
 
 

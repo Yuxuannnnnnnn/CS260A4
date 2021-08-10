@@ -227,10 +227,9 @@ int clientUDPSocket::Get_Store_ClientAddress(
     //char s[INET6_ADDRSTRLEN];
     //inet_ntop(hints.ai_family, ((struct sockaddr_in*)((struct sockaddr*)hints.ai_addr))->sin_addr, s, sizeof (s));
 
-    print_ipv4(&Index_Addresses[clientIndex]);
-
-    std::cout << std::endl;
-
+    uint16_t port = 0;
+   auto ip =  print_ipv4(&Index_Addresses[clientIndex], port);
+   PRINTOUT("host port: ", port, " ip: ", ip, "\n");
 
     //the addrinfo is no longer needed thus free the info
     freeaddrinfo(serverInfo);

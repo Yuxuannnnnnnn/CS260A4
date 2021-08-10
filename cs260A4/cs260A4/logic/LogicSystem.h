@@ -203,7 +203,7 @@ public:
 			{
 				//Respond to the client an InGame notification
 				_InsertNotification(GameCommands::JoinGame, {}, -1);
-				std::cout << "SentJoinGame Mess." << std::endl;
+				PRINTOUT("SentJoinGame Mess.");
 			}
 
 
@@ -249,11 +249,11 @@ public:
 					//add this event to be deleted
 					EventsDeletionList.push_back(i);
 
-					//Respond to the client an InGame notification
-					_InsertNotification(GameCommands::InGame, {}, clientAddrIndex);
-
 					if (std::find(addressIndex.begin(), addressIndex.end(), clientAddrIndex) == addressIndex.end())
 					{
+						//Respond to the client an InGame notification
+						_InsertNotification(GameCommands::InGame, {}, clientAddrIndex);
+
 						PRINTOUT("ClientAddressIndex: "
 							, clientAddrIndex,
 							" has joined game.");

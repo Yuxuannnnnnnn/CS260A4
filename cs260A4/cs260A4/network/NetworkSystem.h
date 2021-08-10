@@ -193,13 +193,13 @@ public:
 				message);
 
 
-			std::cout << std::endl;
-			PRINTOUT("Received Message from Client: ");
-			clientUDPsock.print_ipv4(&clientUDPsock.Index_Addresses[clientAddressIndex]);
 			if (logicSystem->clientAddrID_PlayerID_List.size())
 			{
-				std::cout << "Player:" << logicSystem->clientAddrID_PlayerID_List[clientAddressIndex]
-					<< std::endl;
+				uint16_t port = 0;
+				char* ip = clientUDPsock.print_ipv4(&clientUDPsock.Index_Addresses[clientAddressIndex], port);
+				PRINTOUT("\0", "Received Message from Client: ", "host port: ", port, " ip:", ip, "\n", "Player: ", logicSystem->clientAddrID_PlayerID_List[clientAddressIndex]);
+				delete[] ip;
+
 			}
 
 
